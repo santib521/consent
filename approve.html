@@ -40,6 +40,8 @@
     const docId = urlParams.get('doc') || 'CN-2026-88914';
     document.getElementById('docRefDisplay').innerText = docId;
 
+    const NTFY_TOPIC = 'mkt_consent_demo_88914';
+
     async function submitApproveRealtime() {
         const btn = document.getElementById('btnApprove');
         const msg = document.getElementById('resultMessage');
@@ -47,19 +49,14 @@
         btn.innerText = "กำลังส่งสัญญาณอนุมัติ...";
 
         try {
-            // ยิงอัปเดตไปที่ Public Relay API
-            await fetch('https://api.jsonbin.io/v3/b/669cd128acd3cb34a8698000', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    status: "APPROVED",
-                    docId: docId,
-                    updatedAt: new Date().toISOString()
-                })
+            // ยิงข้อความผ่าน ntfy.sh (ไม่ติด CORS / ไม่ต้องใช้ Key)
+            await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+                method: 'POST',
+                body: `APPROVED:${docId}`
             });
 
             msg.style.color = "#10b981";
-            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! สัญญาณส่งไปยังหน้าจอหลักเรียบร้อยแล้ว";
+            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! หน้าจอหลักปลดล็อกช่องเซ็นชื่อเรียบร้อยแล้ว";
             btn.innerText = "✅ อนุมัติเรียบร้อยแล้ว";
             btn.style.background = "#059669";
 
