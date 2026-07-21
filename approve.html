@@ -49,14 +49,17 @@
         btn.innerText = "กำลังส่งสัญญาณอนุมัติ...";
 
         try {
-            // ยิงข้อความผ่าน ntfy.sh (ไม่ติด CORS / ไม่ต้องใช้ Key)
+            // ยิงข้อความ APPROVED ไปยัง ntfy.sh
             await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
                 method: 'POST',
-                body: `APPROVED:${docId}`
+                body: `APPROVED:${docId}`,
+                headers: {
+                    'Content-Type': 'text/plain'
+                }
             });
 
             msg.style.color = "#10b981";
-            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! หน้าจอหลักปลดล็อกช่องเซ็นชื่อเรียบร้อยแล้ว";
+            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! หน้าจอหลักปลดล็อกเรียบร้อยแล้ว";
             btn.innerText = "✅ อนุมัติเรียบร้อยแล้ว";
             btn.style.background = "#059669";
 
