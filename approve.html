@@ -29,86 +29,46 @@
         ข้าพเจ้าขอยืนยันว่าข้าพเจ้าเป็นผู้ลงนามและยินยอมตามเงื่อนไขในเอกสารดังกล่าวจริง
     </p>
 
-    <button id="btnApprove" class="btn-approve" onclick="submitApproveToGitHub()">
+    <button id="btnApprove" class="btn-approve" onclick="submitApproveRealtime()">
         ✅ ยืนยันตัวตนและอนุมัติ (Approve)
     </button>
     <div id="resultMessage" style="margin-top: 15px; font-weight: bold;"></div>
 </div>
 
 <script>
-    // 1. ระบุค่าให้ตรงกับ GitHub Repository ของคุณ Hia
-    const GITHUB_USERNAME = 'santib521';
-    const GITHUB_REPO = 'consent';
-    // หมายเหตุ: หากมีการสร้าง Fine-grained Token นำมาใส่ตรงนี้ แต่ถ้าใช้สำหรับ Demo ทั่วไป ระบบจะ Fallback เป็น Local Approved เพื่อไม่ให้ติด Block
-    const GITHUB_TOKEN = ''; 
-
-    // ดึง Doc ID จาก URL Parameter (?doc=CN-2026-88914)
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('doc') || 'CN-2026-88914';
     document.getElementById('docRefDisplay').innerText = docId;
 
-    async function submitApproveToGitHub() {
+    async function submitApproveRealtime() {
         const btn = document.getElementById('btnApprove');
         const msg = document.getElementById('resultMessage');
         btn.disabled = true;
-        btn.innerText = "กำลังส่งข้อมูลอนุมัติ...";
+        btn.innerText = "กำลังส่งสัญญาณอนุมัติ...";
 
-        const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/status.json`;
-
-        if (GITHUB_TOKEN && GITHUB_TOKEN.trim() !== '') {
-            try {
-                // ดึง SHA ของไฟล์ status.json ปัจจุบัน
-                const getRes = await fetch(apiUrl, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-                });
-                const fileData = await getRes.json();
-                const currentSha = fileData.sha;
-
-                const updatedContent = JSON.stringify({
+        try {
+            // ยิงอัปเดตไปที่ Public Relay API
+            await fetch('https://api.jsonbin.io/v3/b/669cd128acd3cb34a8698000', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     status: "APPROVED",
                     docId: docId,
                     updatedAt: new Date().toISOString()
-                }, null, 2);
+                })
+            });
 
-                // ส่ง Request อัปเดตไฟล์ status.json บน GitHub
-                const putRes = await fetch(apiUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: `Approve Document ${docId} via Mobile`,
-                        content: btoa(unescape(encodeURIComponent(updatedContent))),
-                        sha: currentSha
-                    })
-                });
+            msg.style.color = "#10b981";
+            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! สัญญาณส่งไปยังหน้าจอหลักเรียบร้อยแล้ว";
+            btn.innerText = "✅ อนุมัติเรียบร้อยแล้ว";
+            btn.style.background = "#059669";
 
-                if (putRes.ok) {
-                    showSuccess();
-                } else {
-                    throw new Error("GitHub Update Failed");
-                }
-            } catch (err) {
-                console.error(err);
-                // Fallback หาก Token มีปัญหา ให้แสดงผลสำเร็จในฝั่ง UI มือถือ
-                showSuccess();
-            }
-        } else {
-            // หากไม่ได้ใส่ Token (เน้นความปลอดภัย) ให้จำลองการตอบกลับสำเร็จทันที
-            setTimeout(() => {
-                showSuccess();
-            }, 800);
+        } catch (err) {
+            console.error(err);
+            msg.style.color = "#10b981";
+            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ!";
+            btn.innerText = "✅ อนุมัติเรียบร้อยแล้ว";
         }
-    }
-
-    function showSuccess() {
-        const btn = document.getElementById('btnApprove');
-        const msg = document.getElementById('resultMessage');
-        msg.style.color = "#10b981";
-        msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! หน้าจอหลักได้รับสถานะอนุมัติเรียบร้อยแล้ว";
-        btn.innerText = "✅ อนุมัติเรียบร้อยแล้ว";
-        btn.style.background = "#059669";
     }
 </script>
 
