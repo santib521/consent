@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital e-Consent & e-Sign System (GitHub Live Demo)</title>
+    <title>Hospital e-Consent & e-Sign System 1.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -223,7 +223,7 @@
 
     <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 10px;">4. TSA Time-Stamp Stamp:</div>
     <div style="font-size: 11px; background: #f1f5f9; padding: 8px; border-radius: 6px; font-family: monospace; border:1px solid #e2e8f0;" id="tsaDisplay">
-        Time: 2026-07-21T17:30:00+07:00<br>TSA Authority: Thai National TSA (RFC 3161)
+        Time: 2026-07-21T18:00:00+07:00<br>TSA Authority: Thai National TSA (RFC 3161)
     </div>
 
     <div style="background: #fff1f2; border: 1px dashed var(--danger); padding: 10px; border-radius: 8px; margin-top: 16px;">
@@ -249,7 +249,7 @@
         </thead>
         <tbody id="auditLogBody">
             <tr>
-                <td>17:30:00</td>
+                <td>18:00:00</td>
                 <td>SYSTEM</td>
                 <td>DOC_CREATED</td>
             </tr>
@@ -342,8 +342,8 @@
                 <p style="font-size: 12px; color: var(--primary-dark); font-weight: 500;">
                     เอามือถือสแกน QR Code นี้ เพื่อเปิดหน้ายืนยันบนมือถือจริง
                 </p>
-                <div style="font-size: 11px; color: #64748b; background: #e0f2fe; padding: 6px 12px; border-radius: 6px;">
-                    🔄 ระบบกำลังรอรับสัญญาณอนุมัติจากมือถืออัตโนมัติ (Live Listener Enabled)
+                <div style="font-size: 11px; color: #0369a1; background: #e0f2fe; padding: 6px 12px; border-radius: 6px; font-weight: bold;">
+                    ⚡ สตรีมสัญญาณ Real-time พร้อมรับคำตอบทันทีเมื่อมือถือกด Approve
                 </div>
                 <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 16px; margin-top: 4px; font-size: 12px;" onclick="verifySignerIdentity('MOBILE_QR_SIMULATE')">
                     (หรือกดจำลองผลการ Approve หากไม่ได้สแกนจริง)
@@ -444,7 +444,7 @@
                 <p><strong>ชื่อ-นามสกุล ผู้ป่วย:</strong> <span id="pdfPatientName">-</span></p>
                 <p><strong>เลขประจำตัวผู้ป่วย (HN):</strong> <span id="pdfPatientHN">-</span></p>
                 <p><strong>หัตถการ / การรักษา:</strong> <span id="pdfProcedure">-</span></p>
-                <p><strong>วันที่ทำรายการ:</strong> 21 กรกฎาคม 2026 เวลา 17:30 น.</p>
+                <p><strong>วันที่ทำรายการ:</strong> 21 กรกฎาคม 2026 เวลา 18:00 น.</p>
             </div>
 
             <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 3px solid #0284c7; font-size: 13px; margin-bottom: 20px;">
@@ -477,7 +477,7 @@
                     <div style="font-size: 10px; color: #0369a1; background: rgba(2,132,199,0.08); padding: 6px; border-radius: 4px; font-family: monospace; text-align: left; margin-top: 8px;">
                         🔒 <strong>PAdES Cryptographic Seal:</strong><br>
                         • Cert: NRCA Thailand (TH-MED-2026-99012)<br>
-                        • TSA Time: 2026-07-21 17:30:02 UTC+7
+                        • TSA Time: 2026-07-21 18:00:02 UTC+7
                     </div>
                 </div>
             </div>
@@ -495,7 +495,10 @@
     let isPatientSigned = false;
     let isDoctorSigned = false;
     let canvas, ctx, isDrawing = false;
-    let pollingTimer = null;
+    let eventSource = null;
+
+    // แชนเนลสื่อสาร Real-time อิสระ
+    const NTFY_TOPIC = 'mkt_consent_demo_88914';
 
     window.onload = function() {
         canvas = document.getElementById('sigCanvas');
@@ -525,9 +528,9 @@
         document.getElementById('authQrSection').style.display = mode === 'QR' ? 'block' : 'none';
 
         if (mode === 'QR') {
-            startPollingStatus();
+            startListeningStatus();
         } else {
-            stopPollingStatus();
+            stopListeningStatus();
         }
     }
 
@@ -597,7 +600,7 @@
 
     function verifySignerIdentity(method) {
         isSignerVerified = true;
-        stopPollingStatus();
+        stopListeningStatus();
         document.getElementById('authStatusBadge').className = 'badge-verified';
         const methodText = method === 'SMS_OTP' ? 'SMS OTP Verified' : 'Mobile QR Scan Approved';
         document.getElementById('authStatusBadge').innerText = '✅ ยืนยันตัวตนสำเร็จ (' + methodText + ')';
@@ -607,38 +610,28 @@
         addAuditLog('PATIENT', 'AUTH_VERIFIED', 'Signer verified via ' + method);
     }
 
-    // REAL-TIME POLLING FROM PUBLIC RELAY
-    function startPollingStatus() {
-        stopPollingStatus();
-        resetRelayState();
+    // REAL-TIME STREAM LISTENER VIA NTFY.SH (Zero-delay, SSE stream)
+    function startListeningStatus() {
+        stopListeningStatus();
 
-        pollingTimer = setInterval(async () => {
-            try {
-                const res = await fetch('https://api.jsonbin.io/v3/b/669cd128acd3cb34a8698000/latest');
-                if (res.ok) {
-                    const result = await res.json();
-                    if (result.record && result.record.status === 'APPROVED') {
-                        verifySignerIdentity('MOBILE_QR_SCAN_REAL');
-                    }
-                }
-            } catch (err) {
-                console.log('Polling status...', err);
-            }
-        }, 1500);
-    }
-
-    async function resetRelayState() {
         try {
-            await fetch('https://api.jsonbin.io/v3/b/669cd128acd3cb34a8698000', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: "PENDING", docId: "CN-2026-88914" })
-            });
-        } catch(e) {}
+            eventSource = new EventSource(`https://ntfy.sh/${NTFY_TOPIC}/sse`);
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.message && data.message.includes('APPROVED')) {
+                    verifySignerIdentity('MOBILE_QR_SCAN_REAL');
+                }
+            };
+        } catch (e) {
+            console.error("SSE Connection error:", e);
+        }
     }
 
-    function stopPollingStatus() {
-        if (pollingTimer) clearInterval(pollingTimer);
+    function stopListeningStatus() {
+        if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+        }
     }
 
     function executePatientSign() {
