@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital e-Consent & e-Sign System (PoC Mockup V4)</title>
+    <title>Hospital e-Consent & e-Sign System (GitHub Integration)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- html2pdf.js for Client-Side Real PDF Download -->
+    <!-- html2pdf.js สำหรับดาวน์โหลดไฟล์ PDF จริง -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -64,7 +64,6 @@
         }
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2,132,199,0.15); }
 
-        /* Consent Clauses */
         .clause-box {
             background: #f8fafc; border-left: 4px solid var(--primary); padding: 16px; border-radius: 0 8px 8px 0;
             margin-bottom: 16px; font-size: 14px;
@@ -202,7 +201,7 @@
 <header>
     <div class="logo-area">
         <h1>🏥 BMA Digital Hospital e-Consent & e-Sign System</h1>
-        <p>ระบบหนังสือยินยอมรับการรักษาและใบรับรองแพทย์อิเล็กทรอนิกส์ (PoC Demo V4)</p>
+        <p>ระบบหนังสือยินยอมรับการรักษาและใบรับรองแพทย์อิเล็กทรอนิกส์ (PoC Demo)</p>
     </div>
     <div class="compliance-badges">
         <span>e-Transactions Act Sec 26/28</span>
@@ -240,7 +239,7 @@
 
     <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 10px;">4. TSA Time-Stamp Stamp:</div>
     <div style="font-size: 11px; background: #f1f5f9; padding: 8px; border-radius: 6px; font-family: monospace; border:1px solid #e2e8f0;" id="tsaDisplay">
-        Time: 2026-07-21T16:30:00+07:00<br>TSA Authority: Thai National TSA (RFC 3161)
+        Time: 2026-07-21T17:00:00+07:00<br>TSA Authority: Thai National TSA (RFC 3161)
     </div>
 
     <div style="background: #fff1f2; border: 1px dashed var(--danger); padding: 10px; border-radius: 8px; margin-top: 16px;">
@@ -266,7 +265,7 @@
         </thead>
         <tbody id="auditLogBody">
             <tr>
-                <td>16:30:00</td>
+                <td>17:00:00</td>
                 <td>SYSTEM</td>
                 <td>DOC_CREATED</td>
             </tr>
@@ -321,7 +320,7 @@
         </div>
     </div>
 
-    <!-- STEP 2: Signer Control (Support OTP & Live QR Scan) -->
+    <!-- STEP 2: Signer Control (Live GitHub Pages QR Link) -->
     <div class="card">
         <div class="card-header">
             <div class="card-title"><span class="step-badge">2</span> Signer Control (การยืนยันตัวตนคนไข้ก่อนเซ็น)</div>
@@ -351,19 +350,22 @@
             <button type="button" class="btn btn-primary" style="width: auto; padding: 8px 24px;" onclick="verifySignerIdentity('SMS_OTP')">ยืนยัน OTP (Verify Signer)</button>
         </div>
 
-        <!-- Section 2: QR Code Scan Mode -->
+        <!-- Section 2: QR Code Scan Mode (Generates Live URL to approve.html on GitHub) -->
         <div class="auth-box" id="authQrSection" style="display: none;">
-            <div>สแกน QR Code เพื่อกด Approve ผ่านแอปบนมือถือ (ThaiD / Hospital App)</div>
+            <div>สแกน QR Code ด้วยกล้องมือถือจริง เพื่อกด Approve</div>
             <div class="qr-card-container">
                 <div class="qr-image-wrapper">
-                    <!-- Dynamic Live QR Code -->
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://bma-hospital.go.th/approve?doc=CN-2026-88914" alt="QR Code Scan" width="130" height="130">
+                    <!-- Dynamic Live QR Code pointing to approve.html on santib521.github.io -->
+                    <img id="liveQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://santib521.github.io/consent/approve.html?doc=CN-2026-88914" alt="QR Code Scan" width="140" height="140">
                 </div>
                 <p style="font-size: 12px; color: var(--primary-dark); font-weight: 500;">
-                    ใช้กล้องมือถือหรือแอปสแกน QR Code นี้ เพื่อกดปุ่ม "ยอมรับและลงนาม"
+                    เอามือถือสแกน QR Code นี้ เพื่อเปิดหน้ายืนยันบนมือถือจริง
                 </p>
-                <button type="button" class="btn btn-primary" style="width: auto; padding: 8px 24px; margin-top: 4px;" onclick="verifySignerIdentity('MOBILE_QR_APP')">
-                    จำลองผลการกด Approve จากมือถือ (Simulate Mobile Approve)
+                <div style="font-size: 11px; color: #64748b; background: #e0f2fe; padding: 6px 12px; border-radius: 6px;">
+                    🔄 ระบบจะคอยเช็กการอนุมัติขากลับอัตโนมัติ (Polling Listener)
+                </div>
+                <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 16px; margin-top: 4px; font-size: 12px;" onclick="verifySignerIdentity('MOBILE_QR_SIMULATE')">
+                    (หรือกดจำลองผลการ Approve หากไม่ได้สแกนจริง)
                 </button>
             </div>
         </div>
@@ -445,7 +447,6 @@
         <div class="pdf-header-bar">
             <div>📄 ตัวอย่างเอกสาร PDF/A ที่ผ่านการประทับตรา 2-Layer สมบูรณ์</div>
             <div style="display:flex; gap:10px;">
-                <!-- Download PDF Button -->
                 <button class="btn btn-download" style="padding: 6px 14px; font-size: 13px;" onclick="downloadRealPDF()">
                     📥 ดาวน์โหลดไฟล์ PDF (Download PDF)
                 </button>
@@ -464,7 +465,7 @@
                 <p><strong>ชื่อ-นามสกุล ผู้ป่วย:</strong> <span id="pdfPatientName">-</span></p>
                 <p><strong>เลขประจำตัวผู้ป่วย (HN):</strong> <span id="pdfPatientHN">-</span></p>
                 <p><strong>หัตถการ / การรักษา:</strong> <span id="pdfProcedure">-</span></p>
-                <p><strong>วันที่ทำรายการ:</strong> 21 กรกฎาคม 2026 เวลา 16:30 น.</p>
+                <p><strong>วันที่ทำรายการ:</strong> 21 กรกฎาคม 2026 เวลา 17:00 น.</p>
             </div>
 
             <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 3px solid #0284c7; font-size: 13px; margin-bottom: 20px;">
@@ -500,7 +501,7 @@
                     <div style="font-size: 10px; color: #0369a1; background: rgba(2,132,199,0.08); padding: 6px; border-radius: 4px; font-family: monospace; text-align: left; margin-top: 8px;">
                         🔒 <strong>PAdES Cryptographic Seal:</strong><br>
                         • Cert: NRCA Thailand (TH-MED-2026-99012)<br>
-                        • TSA Time: 2026-07-21 16:30:02 UTC+7
+                        • TSA Time: 2026-07-21 17:00:02 UTC+7
                     </div>
                 </div>
             </div>
@@ -518,6 +519,7 @@
     let isPatientSigned = false;
     let isDoctorSigned = false;
     let canvas, ctx, isDrawing = false;
+    let pollingTimer = null;
 
     window.onload = function() {
         canvas = document.getElementById('sigCanvas');
@@ -545,6 +547,12 @@
         document.getElementById('tabQr').classList.toggle('active', mode === 'QR');
         document.getElementById('authOtpSection').style.display = mode === 'OTP' ? 'block' : 'none';
         document.getElementById('authQrSection').style.display = mode === 'QR' ? 'block' : 'none';
+
+        if (mode === 'QR') {
+            startPollingStatus();
+        } else {
+            stopPollingStatus();
+        }
     }
 
     function resizeCanvas() {
@@ -613,6 +621,7 @@
 
     function verifySignerIdentity(method) {
         isSignerVerified = true;
+        stopPollingStatus();
         document.getElementById('authStatusBadge').className = 'badge-verified';
         const methodText = method === 'SMS_OTP' ? 'SMS OTP Verified' : 'Mobile QR Scan Approved';
         document.getElementById('authStatusBadge').innerText = '✅ ยืนยันตัวตนสำเร็จ (' + methodText + ')';
@@ -620,6 +629,29 @@
         document.getElementById('btnSignPatient').disabled = false;
 
         addAuditLog('PATIENT', 'AUTH_VERIFIED', 'Signer verified via ' + method);
+    }
+
+    // Polling GitHub for Real Mobile Approve
+    function startPollingStatus() {
+        stopPollingStatus();
+        pollingTimer = setInterval(async () => {
+            try {
+                const res = await fetch('./status.json?t=' + new Date().getTime());
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.status === 'APPROVED') {
+                        verifySignerIdentity('MOBILE_QR_SCAN_REAL');
+                        alert('🎉 ได้รับการอนุมัติผ่านการสแกน QR Code บนมือถือเรียบร้อยแล้ว!');
+                    }
+                }
+            } catch (err) {
+                console.log('Polling status...', err);
+            }
+        }, 2500);
+    }
+
+    function stopPollingStatus() {
+        if (pollingTimer) clearInterval(pollingTimer);
     }
 
     function executePatientSign() {
@@ -669,7 +701,7 @@
         document.getElementById('pdfPreviewModal').style.display = 'none';
     }
 
-    // CLIENT-SIDE REAL PDF DOWNLOAD FUNCTION
+    // REAL CLIENT-SIDE PDF DOWNLOAD
     function downloadRealPDF() {
         const element = document.getElementById('pdfExportArea');
         const docRef = document.getElementById('docRefId').innerText;
