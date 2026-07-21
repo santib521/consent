@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital e-Consent & e-Sign System (PoC Mockup V4)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- html2pdf.js for Client-Side Real PDF Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --secondary: #0f172a;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+        h1, h2, h3, h4 { font-family: 'Prompt', sans-serif; }
+
+        header {
+            background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%);
+            color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        header .logo-area h1 { font-size: 22px; font-weight: 600; }
+        header .logo-area p { font-size: 13px; opacity: 0.85; }
+        header .compliance-badges span {
+            background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; font-size: 12px; margin-left: 6px;
+            backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .main-layout { max-width: 1000px; margin: 30px auto; padding: 0 20px; transition: all 0.3s ease; }
+
+        .card {
+            background: var(--card-bg); border-radius: 12px; padding: 24px; border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 24px;
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px; margin-bottom: 20px;
+        }
+        .card-title { font-size: 18px; color: var(--secondary); display: flex; align-items: center; gap: 8px; }
+        .step-badge {
+            background: var(--primary); color: white; border-radius: 50%; width: 26px; height: 26px;
+            display: inline-flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold;
+        }
+
+        /* Form Elements */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+        .form-control {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+            font-family: 'Sarabun'; transition: all 0.2s;
+        }
+        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2,132,199,0.15); }
+
+        /* Consent Clauses */
+        .clause-box {
+            background: #f8fafc; border-left: 4px solid var(--primary); padding: 16px; border-radius: 0 8px 8px 0;
+            margin-bottom: 16px; font-size: 14px;
+        }
+        .clause-box.marketing { border-left-color: #8b5cf6; background: #faf5ff; }
+        .pdpa-check { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; cursor: pointer; }
+        .pdpa-check input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary); }
+
+        /* Signer Control Tab Options */
+        .auth-tab-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 16px; }
+        .auth-tab-btn {
+            padding: 10px 20px; border: 1px solid var(--border); background: #f8fafc; color: var(--text-muted);
+            border-radius: 8px; cursor: pointer; font-family: 'Prompt'; font-size: 13px; font-weight: 500; transition: all 0.2s;
+        }
+        .auth-tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
+
+        .auth-box {
+            background: #f0f9ff; border: 1px dashed var(--primary); padding: 20px; border-radius: 10px; text-align: center;
+        }
+
+        .otp-input-group { display: flex; justify-content: center; gap: 8px; margin: 12px 0; }
+        .otp-input-group input {
+            width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: bold; border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .qr-card-container {
+            display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px;
+        }
+        .qr-image-wrapper {
+            background: white; padding: 12px; border-radius: 12px; border: 2px solid #bae6fd; box-shadow: 0 4px 12px rgba(2,132,199,0.1);
+        }
+
+        /* Canvas Box */
+        .canvas-container { position: relative; border: 2px dashed #cbd5e1; border-radius: 8px; background: #ffffff; }
+        canvas { width: 100%; height: 160px; display: block; cursor: crosshair; }
+        .canvas-watermark {
+            position: absolute; bottom: 8px; right: 12px; font-size: 11px; color: rgba(2,132,199,0.4);
+            font-weight: 700; pointer-events: none; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .canvas-status-disabled {
+            position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(248,250,252,0.85);
+            display: flex; justify-content: center; align-items: center; color: var(--text-muted); font-size: 14px;
+            font-weight: 500; backdrop-filter: blur(2px); border-radius: 8px;
+        }
+
+        /* Button */
+        .btn {
+            width: 100%; padding: 12px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+            font-family: 'Prompt'; cursor: pointer; transition: all 0.2s; display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--accent); color: white; }
+        .btn-secondary { background: #e2e8f0; color: var(--text); }
+        .btn-download { background: #0f172a; color: #38bdf8; border: 1px solid #334155; }
+        .btn-download:hover { background: #1e293b; color: white; }
+
+        /* Doctor PKI Box */
+        .doctor-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 16px; }
+        .cert-badge { display: flex; align-items: center; gap: 10px; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 10px; border-radius: 8px; color: #065f46; font-size: 13px; }
+        
+        .master-sig-preview {
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; margin: 10px 0;
+        }
+
+        /* Badge Status */
+        .badge-verified { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-unverified { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+
+        /* Collapsible Drawer */
+        .drawer-toggle-btn {
+            position: fixed; right: 0; top: 120px; background: var(--secondary); color: #38bdf8; border: none;
+            padding: 12px 16px; border-radius: 12px 0 0 12px; font-family: 'Prompt'; font-size: 13px; font-weight: 600;
+            cursor: pointer; box-shadow: -2px 4px 12px rgba(0,0,0,0.15); z-index: 100; display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s;
+        }
+        .drawer-toggle-btn:hover { background: #1e293b; color: white; }
+
+        .slide-drawer {
+            position: fixed; right: -420px; top: 0; width: 400px; height: 100vh; background: #ffffff;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15); z-index: 200; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto; padding: 24px; border-left: 1px solid var(--border);
+        }
+        .slide-drawer.open { right: 0; }
+        .drawer-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.4);
+            z-index: 150; backdrop-filter: blur(2px);
+        }
+        .drawer-overlay.open { display: block; }
+
+        .hash-box {
+            background: #0f172a; color: #38bdf8; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px;
+            word-break: break-all; margin: 6px 0; border: 1px solid #1e293b;
+        }
+
+        .audit-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        .audit-table th, .audit-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        .audit-table th { background: #f1f5f9; color: var(--text-muted); font-weight: 600; }
+
+        /* Modal Preview PDF */
+        .pdf-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.7);
+            backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+        }
+        .pdf-paper {
+            background: white; border-radius: 8px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid #cbd5e1; position: relative; display: flex; flex-direction: column;
+        }
+        .pdf-header-bar {
+            background: #0f172a; color: white; padding: 14px 20px; display: flex; justify-content: space-between;
+            align-items: center; position: sticky; top: 0; z-index: 10;
+        }
+        .pdf-content-body { padding: 40px; font-size: 14px; color: #1e293b; line-height: 1.8; background: #ffffff; }
+
+        .pdf-hospital-header { text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 25px; }
+        .pdf-hospital-header h2 { font-size: 20px; color: #0284c7; }
+        .pdf-hospital-header p { font-size: 12px; color: #64748b; }
+
+        .pdf-sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
+        .pdf-sign-box { border: 1px dashed #94a3b8; border-radius: 8px; padding: 15px; text-align: center; background: #f8fafc; }
+
+        .doctor-signature-layer-box {
+            border: 2px solid #0284c7; background: #f0f9ff; border-radius: 8px; padding: 14px; text-align: center; position: relative;
+        }
+        .layer-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-bottom: 6px;
+        }
+        .layer-visual { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .layer-crypto { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-area">
+        <h1>🏥 BMA Digital Hospital e-Consent & e-Sign System</h1>
+        <p>ระบบหนังสือยินยอมรับการรักษาและใบรับรองแพทย์อิเล็กทรอนิกส์ (PoC Demo V4)</p>
+    </div>
+    <div class="compliance-badges">
+        <span>e-Transactions Act Sec 26/28</span>
+        <span>PDPA Compliant</span>
+        <span>PAdES PKI</span>
+    </div>
+</header>
+
+<!-- Toggle Drawer Button -->
+<button class="drawer-toggle-btn" onclick="toggleDrawer()">
+    <span>🔍 Inspector Log & Hash</span>
+</button>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+
+<!-- Slide Drawer Panel -->
+<div class="slide-drawer" id="slideDrawer">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px;">
+        <h3 style="font-size: 16px; color: var(--secondary);">🔍 Cryptographic Inspector</h3>
+        <button onclick="toggleDrawer()" style="border:none; background:none; font-size:20px; cursor:pointer;">✕</button>
+    </div>
+
+    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+        เครื่องมือตรวจสอบความสมบูรณ์และ Audit Log (FDA 21 CFR Part 11)
+    </p>
+
+    <div style="font-size: 12px; font-weight: 600; color: var(--text-muted);">1. Document Payload SHA-256 Hash:</div>
+    <div class="hash-box" id="docHashDisplay">Calculating...</div>
+
+    <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 10px;">2. Patient Signature Binding Token:</div>
+    <div class="hash-box" id="bindingHashDisplay" style="color: #a7f3d0;">Awaiting Signature...</div>
+
+    <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 10px;">3. Doctor PKI Seal Hash (Layer 2):</div>
+    <div class="hash-box" id="doctorPKIHashDisplay" style="color: #fef08a;">Pending Doctor Sign...</div>
+
+    <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 10px;">4. TSA Time-Stamp Stamp:</div>
+    <div style="font-size: 11px; background: #f1f5f9; padding: 8px; border-radius: 6px; font-family: monospace; border:1px solid #e2e8f0;" id="tsaDisplay">
+        Time: 2026-07-21T16:30:00+07:00<br>TSA Authority: Thai National TSA (RFC 3161)
+    </div>
+
+    <div style="background: #fff1f2; border: 1px dashed var(--danger); padding: 10px; border-radius: 8px; margin-top: 16px;">
+        <strong style="color: var(--danger); font-size: 12px;">🧪 ทดลองการแก้ไขเอกสาร (Tamper Test)</strong>
+        <p style="font-size: 11px; color: #881337; margin: 4px 0 8px 0;">
+            ทดลองปรับเปลี่ยนเนื้อหา แล้วดูค่า Hash เปลี่ยนแปลง
+        </p>
+        <button type="button" class="btn btn-secondary" style="font-size: 11px; padding: 6px;" onclick="simulateTamper()">
+            ⚠️ ลองแอบแก้ไขข้อความในเอกสาร
+        </button>
+    </div>
+
+    <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
+
+    <h4 style="font-size: 14px; margin-bottom: 8px;">📜 Immutable Audit Log</h4>
+    <table class="audit-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Actor</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="auditLogBody">
+            <tr>
+                <td>16:30:00</td>
+                <td>SYSTEM</td>
+                <td>DOC_CREATED</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="main-layout">
+    <!-- STEP 1: Document Details & PDPA -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span class="step-badge">1</span> ข้อมูลเอกสารยินยอม & ข้อตกลง PDPA</div>
+            <span style="font-size: 12px; color: var(--text-muted);">Ref ID: <strong id="docRefId">CN-2026-88914</strong></span>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>ชื่อ-นามสกุล ผู้ป่วย (Patient Name)</label>
+                <input type="text" id="patientName" class="form-control" value="นายสมชาย ใจดี" oninput="updateHash()">
+            </div>
+            <div class="form-group">
+                <label>เลขประจำตัวผู้ป่วย (HN / Citizen ID)</label>
+                <input type="text" id="patientHN" class="form-control" value="HN 69-001234 / 1-1002-XXXXX-12-1" oninput="updateHash()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>หัตถการ / การรักษา (Medical Procedure)</label>
+            <input type="text" id="procedureTitle" class="form-control" value="การผ่าตัดส่องกล้องถุงน้ำดี (Laparoscopic Cholecystectomy)" oninput="updateHash()">
+        </div>
+
+        <div class="clause-box">
+            <strong style="color: var(--primary);">[บังคับ] ยินยอมเข้ารับการตรวจรักษาและทำหัตถการ</strong>
+            <p style="font-size: 13px; color: #475569; margin-top: 4px;">
+                ข้าพเจ้าได้รับทราบวัตถุประสงค์ ผลดี ความเสี่ยง และทางเลือกในการรักษาเรียบร้อยแล้ว ยินยอมให้แพทย์และทีมงานทำการรักษาตามรายละเอียดข้างต้น
+            </p>
+            <label class="pdpa-check">
+                <input type="checkbox" id="consentTreatment" checked disabled>
+                <span>ยินยอมรับการตรวจรักษา (Mandatory Treatment Consent)</span>
+            </label>
+        </div>
+
+        <div class="clause-box marketing">
+            <strong style="color: #7c3aed;">[สมัครใจ] PDPA Consent: การวิจัยและข้อมูลการตลาด</strong>
+            <p style="font-size: 13px; color: #475569; margin-top: 4px;">
+                ยินยอมให้โรงพยาบาลใช้ข้อมูลสุขภาพเพื่อการศึกษาวิจัยทางการแพทย์แบบไม่ระบุตัวตน และแจ้งข้อมูลข่าวสารสุขภาพ
+            </p>
+            <label class="pdpa-check">
+                <input type="checkbox" id="consentMarketing" onchange="updateHash()">
+                <span>ยินยอมเปิดเผยข้อมูลเพื่อการวิจัยและการตลาด (Optional Marketing Consent)</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- STEP 2: Signer Control (Support OTP & Live QR Scan) -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span class="step-badge">2</span> Signer Control (การยืนยันตัวตนคนไข้ก่อนเซ็น)</div>
+            <span id="authStatusBadge" class="badge-unverified">ยังไม่ยืนยันตัวตน</span>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+            เลือกช่องทางการยืนยันตัวตนผู้ลงนามตาม พ.ร.บ. ธุรกรรมทางอิเล็กทรอนิกส์
+        </p>
+
+        <div class="auth-tab-bar">
+            <button type="button" class="auth-tab-btn active" id="tabOtp" onclick="switchAuthTab('OTP')">📲 1. SMS OTP Code</button>
+            <button type="button" class="auth-tab-btn" id="tabQr" onclick="switchAuthTab('QR')">📱 2. Scan QR Code Approve</button>
+        </div>
+
+        <!-- Section 1: OTP Mode -->
+        <div class="auth-box" id="authOtpSection">
+            <div>ยืนยันตัวตนผู้ลงนามผ่าน SMS OTP (เบอร์ 081-XXX-8900)</div>
+            <div class="otp-input-group">
+                <input type="text" maxlength="1" value="8">
+                <input type="text" maxlength="1" value="9">
+                <input type="text" maxlength="1" value="2">
+                <input type="text" maxlength="1" value="1">
+                <input type="text" maxlength="1" value="0">
+                <input type="text" maxlength="1" value="5">
+            </div>
+            <button type="button" class="btn btn-primary" style="width: auto; padding: 8px 24px;" onclick="verifySignerIdentity('SMS_OTP')">ยืนยัน OTP (Verify Signer)</button>
+        </div>
+
+        <!-- Section 2: QR Code Scan Mode -->
+        <div class="auth-box" id="authQrSection" style="display: none;">
+            <div>สแกน QR Code เพื่อกด Approve ผ่านแอปบนมือถือ (ThaiD / Hospital App)</div>
+            <div class="qr-card-container">
+                <div class="qr-image-wrapper">
+                    <!-- Dynamic Live QR Code -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://bma-hospital.go.th/approve?doc=CN-2026-88914" alt="QR Code Scan" width="130" height="130">
+                </div>
+                <p style="font-size: 12px; color: var(--primary-dark); font-weight: 500;">
+                    ใช้กล้องมือถือหรือแอปสแกน QR Code นี้ เพื่อกดปุ่ม "ยอมรับและลงนาม"
+                </p>
+                <button type="button" class="btn btn-primary" style="width: auto; padding: 8px 24px; margin-top: 4px;" onclick="verifySignerIdentity('MOBILE_QR_APP')">
+                    จำลองผลการกด Approve จากมือถือ (Simulate Mobile Approve)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: Patient Signature -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span class="step-badge">3</span> ลายเซ็นคนไข้ & Dynamic Binding</div>
+            <span style="font-size: 12px; color: var(--text-muted);">Binding ID: <strong id="bindingToken">PENDING</strong></span>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="sigCanvas"></canvas>
+            <div class="canvas-watermark" id="canvasWatermarkText">USED ONLY FOR DOC #CN-2026-88914</div>
+            <div class="canvas-status-disabled" id="canvasDisabledOverlay">
+                🔒 กรุณายืนยันตัวตนด้วย OTP หรือ QR Code ในขั้นตอนที่ 2 ก่อนปลดล็อกการเซ็น
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+            <button type="button" class="btn btn-secondary" onclick="clearCanvas()">ล้างลายเซ็น</button>
+            <button type="button" class="btn btn-success" id="btnSignPatient" disabled onclick="executePatientSign()">บันทึกและประทับตราลายเซ็นคนไข้ (Apply Bound Signature)</button>
+        </div>
+    </div>
+
+    <!-- STEP 4: Doctor Signature Architecture (2-Layer Hybrid) -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><span class="step-badge">4</span> การลงนามของแพทย์ (Hybrid 2-Layer e-Signature)</div>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+            รวมการทำงานของ **Layer 1: Master Visual Signature (HIS)** + **Layer 2: Digital Certificate (PKI Seal)**
+        </p>
+
+        <div class="doctor-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                    <strong>นพ. วิชัย วาณิชกุล (ว. 45219)</strong>
+                    <div style="font-size: 12px; color: var(--text-muted);">ศัลยแพทย์ผู้รับผิดชอบการผ่าตัด</div>
+                </div>
+                <span id="doctorSignStatus" class="badge-unverified">รอแพทย์ลงนาม</span>
+            </div>
+
+            <!-- Layer 1 Preview -->
+            <div style="background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px; margin: 10px 0;">
+                <div style="font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 4px;">
+                    🖼️ Layer 1: Visual Master Signature (ดึงจากฐานข้อมูล HIS อัตโนมัติ)
+                </div>
+                <div class="master-sig-preview">
+                    <svg width="180" height="45" viewBox="0 0 200 50" style="display:block; margin:0 auto;">
+                        <path d="M 10 35 Q 30 5, 50 30 T 90 20 T 130 35 T 170 15" stroke="#0284c7" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        <text x="120" y="42" font-family="Sarabun" font-size="11" fill="#0369a1" font-weight="bold">วิชัย ว.</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Layer 2 Info -->
+            <div class="cert-badge" style="margin-bottom: 12px;">
+                🔑 <strong>Layer 2: X.509 PKI Seal (Cloud HSM):</strong> Certificate ID <code>TH-MED-2026-99012</code>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>กรอก PIN 6 หลักเพื่อปลดล็อก Private Key บน Cloud HSM (Doctor HSM Key PIN)</label>
+                <input type="password" id="doctorPin" class="form-control" value="123456" placeholder="******">
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="executeDoctorPKISign()">
+                🖊️ แปะ Master Signature & ประทับตรา PKI Seal (Preview Final Signed PDF)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal PREVIEW PDF DOCUMENT with REAL PDF DOWNLOAD BUTTON -->
+<div class="pdf-modal" id="pdfPreviewModal">
+    <div class="pdf-paper">
+        <div class="pdf-header-bar">
+            <div>📄 ตัวอย่างเอกสาร PDF/A ที่ผ่านการประทับตรา 2-Layer สมบูรณ์</div>
+            <div style="display:flex; gap:10px;">
+                <!-- Download PDF Button -->
+                <button class="btn btn-download" style="padding: 6px 14px; font-size: 13px;" onclick="downloadRealPDF()">
+                    📥 ดาวน์โหลดไฟล์ PDF (Download PDF)
+                </button>
+                <button onclick="closePdfPreview()" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
+            </div>
+        </div>
+
+        <div class="pdf-content-body" id="pdfExportArea">
+            <div class="pdf-hospital-header">
+                <h2>โรงพยาบาลกรุงเทพมหานคร (BMA Digital Hospital)</h2>
+                <p>หนังสือยินยอมเข้ารับการตรวจรักษาและทำหัตถการ (e-Consent Form)</p>
+                <p style="font-size:11px; color:#94a3b8; margin-top:2px;">Document Reference No: <span id="pdfDocRef">CN-2026-88914</span></p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <p><strong>ชื่อ-นามสกุล ผู้ป่วย:</strong> <span id="pdfPatientName">-</span></p>
+                <p><strong>เลขประจำตัวผู้ป่วย (HN):</strong> <span id="pdfPatientHN">-</span></p>
+                <p><strong>หัตถการ / การรักษา:</strong> <span id="pdfProcedure">-</span></p>
+                <p><strong>วันที่ทำรายการ:</strong> 21 กรกฎาคม 2026 เวลา 16:30 น.</p>
+            </div>
+
+            <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 3px solid #0284c7; font-size: 13px; margin-bottom: 20px;">
+                <strong>เงื่อนไขการยินยอม:</strong> ข้าพเจ้าได้รับทราบวัตถุประสงค์ ผลดี ความเสี่ยง และทางเลือกในการรักษาเรียบร้อยแล้ว ยินยอมให้แพทย์และทีมงานทำการรักษาตามรายละเอียดข้างต้น โดยการลงนามนี้กระทำผ่านระบบ e-Consent ที่มีการยืนยันตัวตนถูกต้องตามกฎหมาย
+            </div>
+
+            <!-- Signature Grid -->
+            <div class="pdf-sign-grid">
+                <!-- Patient Signature Box -->
+                <div class="pdf-sign-box">
+                    <div style="font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 8px;">ลายเซ็นผู้ป่วย / ผู้มีอำนาจลงนาม</div>
+                    <img id="pdfPatientSigImg" src="" alt="Patient Signature" style="max-height: 50px; margin: 5px auto; display:block;">
+                    <div style="font-size: 11px; color: #0284c7; font-weight: bold; margin-top: 4px;" id="pdfPatientBindingText">BIND-PATIENT-XXXX</div>
+                    <div style="font-size: 10px; color: #94a3b8;" id="pdfAuthMethodText">ยืนยันตัวตนผ่าน SMS OTP (Verified)</div>
+                </div>
+
+                <!-- Doctor 2-Layer Signature Box -->
+                <div class="pdf-sign-box doctor-signature-layer-box">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span class="layer-badge layer-visual">Layer 1: Visual Master</span>
+                        <span class="layer-badge layer-crypto">Layer 2: PKI Sealed</span>
+                    </div>
+
+                    <div style="margin: 4px 0;">
+                        <svg width="160" height="40" viewBox="0 0 200 50" style="display:block; margin:0 auto;">
+                            <path d="M 10 35 Q 30 5, 50 30 T 90 20 T 130 35 T 170 15" stroke="#0284c7" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <text x="120" y="42" font-family="Sarabun" font-size="11" fill="#0369a1" font-weight="bold">วิชัย ว.</text>
+                        </svg>
+                        <div style="font-size: 13px; font-weight: bold; color: #0f172a;">( นพ. วิชัย วาณิชกุล )</div>
+                        <div style="font-size: 11px; color: #475569;">แพทย์ผู้รับผิดชอบ (ว. 45219)</div>
+                    </div>
+
+                    <div style="font-size: 10px; color: #0369a1; background: rgba(2,132,199,0.08); padding: 6px; border-radius: 4px; font-family: monospace; text-align: left; margin-top: 8px;">
+                        🔒 <strong>PAdES Cryptographic Seal:</strong><br>
+                        • Cert: NRCA Thailand (TH-MED-2026-99012)<br>
+                        • TSA Time: 2026-07-21 16:30:02 UTC+7
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; border-top: 1px dashed #cbd5e1; padding-top: 10px; font-size: 10px; color: #94a3b8; text-align: center;">
+                🔒 เอกสารฉบับนี้ถูกประทับตราดิจิทัลสมบูรณ์ด้วย X.509 Certificate (Section 26 & 28 e-Transactions Act) หากมีการแก้ไขข้อความ เอกสารจะขึ้นเตือน Signature Invalid ทันที
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isSignerVerified = false;
+    let authMethodUsed = 'SMS_OTP';
+    let isPatientSigned = false;
+    let isDoctorSigned = false;
+    let canvas, ctx, isDrawing = false;
+
+    window.onload = function() {
+        canvas = document.getElementById('sigCanvas');
+        ctx = canvas.getContext('2d');
+        resizeCanvas();
+        updateHash();
+        addAuditLog('SYSTEM', 'DOC_INITIATED', 'Document initialized');
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+    };
+
+    function toggleDrawer() {
+        document.getElementById('slideDrawer').classList.toggle('open');
+        document.getElementById('drawerOverlay').classList.toggle('open');
+    }
+
+    function switchAuthTab(mode) {
+        authMethodUsed = mode;
+        document.getElementById('tabOtp').classList.toggle('active', mode === 'OTP');
+        document.getElementById('tabQr').classList.toggle('active', mode === 'QR');
+        document.getElementById('authOtpSection').style.display = mode === 'OTP' ? 'block' : 'none';
+        document.getElementById('authQrSection').style.display = mode === 'QR' ? 'block' : 'none';
+    }
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 160;
+    }
+
+    function startDrawing(e) {
+        if (!isSignerVerified) return;
+        isDrawing = true;
+        draw(e);
+    }
+    function draw(e) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#0284c7';
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath();
+        updateBindingToken();
+    }
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        updateBindingToken();
+    }
+
+    async function sha256(str) {
+        const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function updateHash() {
+        const payload = {
+            docId: document.getElementById('docRefId').innerText,
+            patientName: document.getElementById('patientName').value,
+            patientHN: document.getElementById('patientHN').value,
+            procedure: document.getElementById('procedureTitle').value,
+            marketingConsent: document.getElementById('consentMarketing').checked
+        };
+        const rawString = JSON.stringify(payload);
+        const hash = await sha256(rawString);
+        document.getElementById('docHashDisplay').innerText = hash;
+    }
+
+    async function updateBindingToken() {
+        const docHash = document.getElementById('docHashDisplay').innerText;
+        const canvasData = canvas.toDataURL();
+        const bindingRaw = docHash + "_" + document.getElementById('patientHN').value + "_" + canvasData.substring(0, 50);
+        const bindingHash = await sha256(bindingRaw);
+        
+        const tokenStr = "BIND-PATIENT-" + bindingHash.substring(0, 12).toUpperCase();
+        document.getElementById('bindingToken').innerText = tokenStr;
+        document.getElementById('bindingHashDisplay').innerText = bindingHash;
+    }
+
+    function verifySignerIdentity(method) {
+        isSignerVerified = true;
+        document.getElementById('authStatusBadge').className = 'badge-verified';
+        const methodText = method === 'SMS_OTP' ? 'SMS OTP Verified' : 'Mobile QR Scan Approved';
+        document.getElementById('authStatusBadge').innerText = '✅ ยืนยันตัวตนสำเร็จ (' + methodText + ')';
+        document.getElementById('canvasDisabledOverlay').style.display = 'none';
+        document.getElementById('btnSignPatient').disabled = false;
+
+        addAuditLog('PATIENT', 'AUTH_VERIFIED', 'Signer verified via ' + method);
+    }
+
+    function executePatientSign() {
+        isPatientSigned = true;
+        addAuditLog('PATIENT', 'SIGN_BOUND', 'Patient signature applied & bound');
+        alert('บันทึกปลายเซ็นคนไข้สำเร็จ!');
+    }
+
+    async function executeDoctorPKISign() {
+        if (!isPatientSigned) {
+            alert('⚠️ คนไข้ต้องลงนามในขั้นตอนที่ 3 ก่อน แพทย์จึงจะลงนามปิดท้ายได้');
+            return;
+        }
+        const pin = document.getElementById('doctorPin').value;
+        if (pin !== "123456") {
+            alert('❌ PIN รหัสผ่าน Private Key ไม่ถูกต้อง');
+            return;
+        }
+
+        isDoctorSigned = true;
+        document.getElementById('doctorSignStatus').className = 'badge-verified';
+        document.getElementById('doctorSignStatus').innerText = '✅ ลงนามดิจิทัลสมบูรณ์ (2-Layer Signed)';
+        
+        const doctorHash = await sha256("DOCTOR_PKI_SEAL_" + new Date().getTime());
+        document.getElementById('doctorPKIHashDisplay').innerText = doctorHash;
+
+        addAuditLog('DOCTOR', 'MASTER_IMAGE_APPLIED', 'Applied Layer 1 Master Signature Image from HIS');
+        addAuditLog('DOCTOR', 'PKI_SEALED', 'Applied Layer 2 X.509 Digital Seal + TSA');
+
+        openPdfPreview();
+    }
+
+    function openPdfPreview() {
+        document.getElementById('pdfDocRef').innerText = document.getElementById('docRefId').innerText;
+        document.getElementById('pdfPatientName').innerText = document.getElementById('patientName').value;
+        document.getElementById('pdfPatientHN').innerText = document.getElementById('patientHN').value;
+        document.getElementById('pdfProcedure').innerText = document.getElementById('procedureTitle').value;
+        
+        document.getElementById('pdfPatientSigImg').src = canvas.toDataURL();
+        document.getElementById('pdfPatientBindingText').innerText = document.getElementById('bindingToken').innerText;
+        document.getElementById('pdfAuthMethodText').innerText = 'ยืนยันตัวตนด้วย ' + (authMethodUsed === 'OTP' ? 'SMS OTP' : 'Mobile App QR Scan');
+
+        document.getElementById('pdfPreviewModal').style.display = 'flex';
+    }
+
+    function closePdfPreview() {
+        document.getElementById('pdfPreviewModal').style.display = 'none';
+    }
+
+    // CLIENT-SIDE REAL PDF DOWNLOAD FUNCTION
+    function downloadRealPDF() {
+        const element = document.getElementById('pdfExportArea');
+        const docRef = document.getElementById('docRefId').innerText;
+        
+        const opt = {
+            margin:       10,
+            filename:     'eConsent_' + docRef + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save();
+    }
+
+    function simulateTamper() {
+        document.getElementById('patientName').value += " (ถูกแก้ไขแอบอ้าง)";
+        updateHash();
+        document.getElementById('docHashDisplay').style.color = '#ef4444';
+        alert('⚠️ ค่า SHA-256 Hash เปลี่ยนแปลงทันที! ระบบแจ้งเตือนการดัดแปลงเอกสาร');
+    }
+
+    function addAuditLog(actor, action, details) {
+        const tbody = document.getElementById('auditLogBody');
+        const now = new Date().toTimeString().split(' ')[0];
+        const row = `<tr>
+            <td>${now}</td>
+            <td><strong>${actor}</strong></td>
+            <td><code>${action}</code></td>
+        </tr>`;
+        tbody.innerHTML = row + tbody.innerHTML;
+    }
+</script>
+
+</body>
+</html>
