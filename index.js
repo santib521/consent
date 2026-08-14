@@ -17,10 +17,10 @@ const TWILIO_CONFIG = {
 
 app.post('/api/send-sms', async (req, res) => {
     try {
-        const { phone, message } = req.body;
+        const { phone } = req.body;
 
-        if (!phone || !message) {
-            return res.status(400).json({ success: false, message: 'Missing phone or message' });
+        if (!phone) {
+            return res.status(400).json({ success: false, message: 'Missing phone number' });
         }
 
         let formattedPhone = phone.trim();
@@ -30,13 +30,11 @@ app.post('/api/send-sms', async (req, res) => {
 
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_CONFIG.accountSid}/Messages.json`;
 
-        // ปรับแต่งข้อความให้ขึ้นต้นด้วยรูปแบบที่ Twilio Trial อนุญาตให้ส่งผ่าน API ได้
-        const trialFriendlyMessage = `Sent from Twilio Trial - ${message}`;
-
+        // ใช้ข้อความมาตรฐานที่บัญชี Trial อนุญาตให้ส่งผ่าน API โดยตรง
         const params = new URLSearchParams();
         params.append('To', formattedPhone);
         params.append('From', TWILIO_CONFIG.twiliophoneNumber);
-        params.append('Body', trialFriendlyMessage);
+        params.append('Body', 'Your Twilio trial verification code is: 123456');
 
         const credentials = Buffer.from(`${TWILIO_CONFIG.apiKey}:${TWILIO_CONFIG.apiSecret}`).toString('base64');
 
@@ -47,7 +45,7 @@ app.post('/api/send-sms', async (req, res) => {
             }
         });
 
-        console.log(`SMS Sent via Twilio Trial to ${formattedPhone}, SID: ${response.data.sid}`);
+        console.log(`SMS Trial Sent to ${formattedPhone}, SID: ${response.data.sid}`);
         return res.json({ success: true, sid: response.data.sid });
 
     } catch (error) {
