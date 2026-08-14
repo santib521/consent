@@ -8,11 +8,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const TWILIO_CONFIG = {
-    accountSid: "AC5bdf4ab6e4c0b1f8a8c35cd4468e42df",
-    apiKey: "SKaca5862f00ae751f9a3cb816cbd20981",
-    apiSecret: "f1fOKFEPam26odQV24LIVDgS180SxWWA",
-    twiliophoneNumber: "+17372508034"
+// --- ตั้งค่าข้อมูล ClickSend ของคุณ ---
+const CLICKSEND_CONFIG = {
+    username: "santib521@gmail.com",
+    apiKey: "2467C4C3-CF7F-51A9-676A-547CA8D2E71F"
 };
 
 app.post('/api/send-sms', async (req, res) => {
@@ -23,33 +22,44 @@ app.post('/api/send-sms', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Missing phone or message' });
         }
 
+        // แปลงเบอร์โทรให้เป็นรูปแบบสากล (ClickSend รองรับเครื่องหมาย + เช่น +66813338900)
         let formattedPhone = phone.trim();
         if (formattedPhone.startsWith('0')) {
             formattedPhone = '+66' + formattedPhone.substring(1);
+        } else if (!formattedPhone.startsWith('+')) {
+            formattedPhone = '+' + formattedPhone;
         }
 
-        // ใช้ Messaging API endpoint มาตรฐาน (ไม่ใช่ Verify API)
-        const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_CONFIG.accountSid}/Messages.json`;
+        // ClickSend REST API Endpoint สำหรับส่ง SMS
+        const clickSendUrl = 'https://rest.clicksend.com/v3/sms/send';
 
-        const params = new URLSearchParams();
-        params.append('To', formattedPhone);
-        params.append('From', TWILIO_CONFIG.twiliophoneNumber);
-        params.append('Body', message); // ส่งข้อความตรงตามที่ส่งมาจากหน้าเว็บ
+        // รูปแบบ Payload ตามมาตรฐาน ClickSend API
+        const payload = {
+            messages: [
+                {
+                    source: "node",
+                    from: "MKT_Hospital",
+                    body: message,
+                    to: formattedPhone
+                }
+            ]
+        };
 
-        const credentials = Buffer.from(`${TWILIO_CONFIG.apiKey}:${TWILIO_CONFIG.apiSecret}`).toString('base64');
+        // ทำ Basic Authentication ด้วย Username และ API Key ของ ClickSend
+        const authHeader = 'Basic ' + Buffer.from(`${CLICKSEND_CONFIG.username}:${CLICKSEND_CONFIG.apiKey}`).toString('base64');
 
-        const response = await axios.post(twilioUrl, params, {
+        const response = await axios.post(clickSendUrl, payload, {
             headers: {
-                'Authorization': `Basic ${credentials}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Authorization': authHeader,
+                'Content-Type': 'application/json'
             }
         });
 
-        console.log(`SMS Sent Successfully to ${formattedPhone}, SID: ${response.data.sid}`);
-        return res.json({ success: true, sid: response.data.sid });
+        console.log(`SMS Sent successfully via ClickSend to ${formattedPhone}`);
+        return res.json({ success: true, data: response.data });
 
     } catch (error) {
-        console.error('Twilio Messaging Error:', error.response?.data || error.message);
+        console.error('ClickSend Error Detail:', error.response?.data || error.message);
         return res.status(500).json({ 
             success: false, 
             error: error.response?.data || error.message 
@@ -57,8 +67,8 @@ app.post('/api/send-sms', async (req, res) => {
     }
 });
 
-app.get('/', (req, res) => {
-    res.send('MKT Hospital Twilio SMS Proxy Server is running.');
+app.get('/', (devReq, res) => {
+    res.send('MKT Hospital ClickSend SMS Proxy Server is running.');
 });
 
 app.listen(PORT, () => {
