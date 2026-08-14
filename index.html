@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MKT Hospital e-Consent System (HA/JCI Standard + SMS-KUB)</title>
+    <title>MKT Hospital e-Consent System (HA/JCI Standard + Twilio)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -127,7 +127,7 @@
         </div>
         <div class="compliance-badges">
             <span>HA/JCI PFR.4</span>
-            <span>SMS-KUB Live Proxy</span>
+            <span>Twilio Live Proxy</span>
         </div>
     </header>
 
@@ -144,7 +144,7 @@
             </div>
             <div class="form-group">
                 <label>เบอร์มือถือผู้ป่วย (Phone Number)</label>
-                <input type="text" id="patientPhone" class="form-control" value="0874999456">
+                <input type="text" id="patientPhone" class="form-control" value="08174999456">
             </div>
         </div>
 
@@ -178,7 +178,7 @@
         <!-- แผงส่ง OTP -->
         <div class="auth-box" id="modeOtpSection">
             <div id="otpRequestView">
-                <span style="color:var(--text-muted);">ส่งรหัส OTP 6 หลักผ่าน SMS-KUB ไปยังมือถือคนไข้จริง</span><br>
+                <span style="color:var(--text-muted);">ส่งรหัส OTP 6 หลักผ่าน Twilio ไปยังมือถือคนไข้จริง</span><br>
                 <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsOtpCode()">
                     📤 ส่ง SMS OTP ผ่าน Proxy
                 </button>
@@ -202,7 +202,7 @@
         <!-- แผงส่ง URL Link -->
         <div class="auth-box" id="modeUrlSection" style="display: none;">
             <div id="urlRequestView">
-                <span style="color:var(--text-muted);">ส่งข้อความแนบลิงก์หน้าจอ Approve ไปยังมือถือคนไข้จริง</span><br>
+                <span style="color:var(--text-muted);">ส่งข้อความแนบลิงก์หน้าจอ Approve ผ่าน Twilio ไปยังมือถือคนไข้จริง</span><br>
                 <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsUrlLink()">
                     🔗 ส่ง SMS แนบลิงก์ผ่าน Proxy
                 </button>
@@ -334,11 +334,11 @@
 </div>
 
 <script>
-    // URL Backend Proxy บน Render ที่คุณเพิ่งสร้างขึ้น
+    // URL Backend Proxy บน Render
     const PROXY_URL = "https://consent-zhrr.onrender.com/api/send-sms";
 
     let isSignerVerified = false;
-    let selectedSmsMode = 'OTP'; // 'OTP' หรือ 'URL'
+    let selectedSmsMode = 'OTP'; 
     let currentAuthTransactionId = '';
     let isPatientSigned = false;
     let isDoctorSigned = false;
@@ -365,7 +365,6 @@
         document.getElementById('drawerOverlay').classList.toggle('open');
     }
 
-    // ฟังก์ชันสลับ Option ระหว่าง OTP และ URL
     function switchSmsMode(mode) {
         selectedSmsMode = mode;
         document.getElementById('tabOtp').classList.toggle('active', mode === 'OTP');
@@ -376,7 +375,7 @@
         if (mode !== 'URL') stopListeningStatus();
     }
 
-    // Option A: ส่ง SMS แบบรหัส OTP ผ่าน Render Proxy
+    // Option A: ส่ง SMS แบบรหัส OTP ผ่าน Render Proxy (เชื่อมต่อ Twilio)
     async function sendSmsOtpCode() {
         const phone = document.getElementById('patientPhone').value.trim();
         const docId = document.getElementById('docRefId').innerText;
@@ -397,9 +396,9 @@
             });
             const result = await res.json();
             if (result.success) {
-                document.getElementById('otpInstructionText').innerHTML = `📲 ส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> สำเร็จจริง!`;
+                document.getElementById('otpInstructionText').innerHTML = `📲 ส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> ผ่าน Twilio สำเร็จ!`;
             } else {
-                alert('ส่ง SMS ไม่สำเร็จ: กรุณาตรวจสอบเครดิตใน SMS-KUB');
+                alert('ส่ง SMS ผ่าน Twilio ไม่สำเร็จ: กรุณาตรวจสอบเบอร์ปลายทางหรือการตั้งค่า Proxy');
             }
             addAuditLog('SYSTEM', 'SMS_OTP_SENT', `OTP sent to ${phone}`);
         } catch (e) {
@@ -408,7 +407,6 @@
         }
     }
 
-    // ยืนยันรหัส OTP ที่คนไข้กรอก
     function verifyOtpCode() {
         const inputs = document.querySelectorAll('.otp-box');
         let entered = '';
@@ -422,7 +420,7 @@
         markVerified('SMS_OTP_VERIFIED');
     }
 
-    // Option B: ส่ง SMS แบบลิงก์ URL ผ่าน Render Proxy
+    // Option B: ส่ง SMS แบบลิงก์ URL ผ่าน Render Proxy (เชื่อมต่อ Twilio)
     async function sendSmsUrlLink() {
         const phone = document.getElementById('patientPhone').value.trim();
         const docId = document.getElementById('docRefId').innerText;
@@ -446,7 +444,7 @@
             if (result.success) {
                 document.getElementById('urlStatusText').innerHTML = `⏳ ส่งลิงก์ไปยังเบอร์ <strong>${phone}</strong> สำเร็จ! กำลังรอคนไข้กด Approve...`;
             } else {
-                alert('ส่ง SMS ไม่สำเร็จ: กรุณาตรวจสอบเครดิตใน SMS-KUB');
+                alert('ส่ง SMS ผ่าน Twilio ไม่สำเร็จ: กรุณาตรวจสอบเบอร์ปลายทางหรือการตั้งค่า Proxy');
             }
             addAuditLog('SYSTEM', 'SMS_URL_SENT', `Approval URL sent to ${phone}`);
         } catch (e) {
@@ -454,11 +452,9 @@
             alert('เกิดข้อผิดพลาดในการเชื่อมต่อ Proxy Server');
         }
 
-        // เริ่มฟังสัญญาณ Real-time จากหน้า approve.html
         startListeningStatus();
     }
 
-    // ฟังสัญญาณ Real-time เมื่อคนไข้กด Approve จากมือถือ
     function startListeningStatus() {
         stopListeningStatus();
         try {
