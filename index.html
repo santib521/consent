@@ -127,7 +127,7 @@
         </div>
         <div class="compliance-badges">
             <span>HA/JCI PFR.4</span>
-            <span>SMS-KUB Live</span>
+            <span>SMS-KUB Live Proxy</span>
         </div>
     </header>
 
@@ -166,7 +166,7 @@
     <!-- ส่วนเลือก Option ส่ง SMS -->
     <div class="auth-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-            <span style="font-size:11px; font-weight:bold;">🔐 เลือกรูปแบบการส่ง SMS ยืนยันตัวตน (SMS-KUB Gateway)</span>
+            <span style="font-size:11px; font-weight:bold;">🔐 เลือกรูปแบบการส่ง SMS ยืนยันตัวตน (ผ่าน Render Proxy)</span>
             <span id="authStatusBadge" class="badge-unverified">สถานะ: PENDING</span>
         </div>
 
@@ -178,9 +178,9 @@
         <!-- แผงส่ง OTP -->
         <div class="auth-box" id="modeOtpSection">
             <div id="otpRequestView">
-                <span style="color:var(--text-muted);">ส่งรหัส OTP 6 หลักผ่าน SMS-KUB ไปยังมือถือคนไข้</span><br>
+                <span style="color:var(--text-muted);">ส่งรหัส OTP 6 หลักผ่าน SMS-KUB ไปยังมือถือคนไข้จริง</span><br>
                 <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsOtpCode()">
-                    📤 ส่ง SMS OTP จริง
+                    📤 ส่ง SMS OTP ผ่าน Proxy
                 </button>
             </div>
             <div id="otpVerifyView" style="display: none;">
@@ -202,9 +202,9 @@
         <!-- แผงส่ง URL Link -->
         <div class="auth-box" id="modeUrlSection" style="display: none;">
             <div id="urlRequestView">
-                <span style="color:var(--text-muted);">ส่งข้อความแนบลิงก์หน้าจอ Approve ไปยังมือถือคนไข้</span><br>
+                <span style="color:var(--text-muted);">ส่งข้อความแนบลิงก์หน้าจอ Approve ไปยังมือถือคนไข้จริง</span><br>
                 <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsUrlLink()">
-                    🔗 ส่ง SMS แนบลิงก์ (Approval Link)
+                    🔗 ส่ง SMS แนบลิงก์ผ่าน Proxy
                 </button>
             </div>
             <div id="urlWaitingView" style="display: none;">
@@ -334,11 +334,8 @@
 </div>
 
 <script>
-    // Config ค่า API ของ SMS-KUB
-    const SMSKUB_CONFIG = {
-        endpoint: "https://console.sms-kub.com/api",
-        apiKey: "gK6sDWwzsMWe7w9tpVirKIrNfqj5j9jH"
-    };
+    // URL Backend Proxy บน Render ที่คุณเพิ่งสร้างขึ้น
+    const PROXY_URL = "https://consent-zhrr.onrender.com/api/send-sms";
 
     let isSignerVerified = false;
     let selectedSmsMode = 'OTP'; // 'OTP' หรือ 'URL'
@@ -379,7 +376,7 @@
         if (mode !== 'URL') stopListeningStatus();
     }
 
-    // Option A: ส่ง SMS แบบรหัส OTP ผ่าน SMS-KUB API
+    // Option A: ส่ง SMS แบบรหัส OTP ผ่าน Render Proxy
     async function sendSmsOtpCode() {
         const phone = document.getElementById('patientPhone').value.trim();
         const docId = document.getElementById('docRefId').innerText;
@@ -390,16 +387,25 @@
 
         document.getElementById('otpRequestView').style.display = 'none';
         document.getElementById('otpVerifyView').style.display = 'block';
-        document.getElementById('otpInstructionText').innerHTML = `📲 ส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> แล้ว (รหัสทดสอบ: ${generatedOtpCode})`;
+        document.getElementById('otpInstructionText').innerHTML = `📲 กำลังส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong>...`;
 
         try {
-            await fetch(`${SMSKUB_CONFIG.endpoint}/send`, {
+            const res = await fetch(PROXY_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SMSKUB_CONFIG.apiKey}` },
-                body: JSON.stringify({ apiKey: SMSKUB_CONFIG.apiKey, to: phone, message: msg })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phone, message: msg })
             });
+            const result = await res.json();
+            if (result.success) {
+                document.getElementById('otpInstructionText').innerHTML = `📲 ส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> สำเร็จจริง!`;
+            } else {
+                alert('ส่ง SMS ไม่สำเร็จ: กรุณาตรวจสอบเครดิตใน SMS-KUB');
+            }
             addAuditLog('SYSTEM', 'SMS_OTP_SENT', `OTP sent to ${phone}`);
-        } catch (e) { console.log("SMS-KUB Fallback mode active"); }
+        } catch (e) {
+            console.error(e);
+            alert('เกิดข้อผิดพลาดในการเชื่อมต่อ Proxy Server');
+        }
     }
 
     // ยืนยันรหัส OTP ที่คนไข้กรอก
@@ -416,7 +422,7 @@
         markVerified('SMS_OTP_VERIFIED');
     }
 
-    // Option B: ส่ง SMS แบบลิงก์ URL ผ่าน SMS-KUB API
+    // Option B: ส่ง SMS แบบลิงก์ URL ผ่าน Render Proxy
     async function sendSmsUrlLink() {
         const phone = document.getElementById('patientPhone').value.trim();
         const docId = document.getElementById('docRefId').innerText;
@@ -428,15 +434,25 @@
 
         document.getElementById('urlRequestView').style.display = 'none';
         document.getElementById('urlWaitingView').style.display = 'block';
+        document.getElementById('urlStatusText').innerHTML = `⏳ กำลังส่งลิงก์ไปยังเบอร์ <strong>${phone}</strong>...`;
 
         try {
-            await fetch(`${SMSKUB_CONFIG.endpoint}/send`, {
+            const res = await fetch(PROXY_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SMSKUB_CONFIG.apiKey}` },
-                body: JSON.stringify({ apiKey: SMSKUB_CONFIG.apiKey, to: phone, message: msg })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phone, message: msg })
             });
+            const result = await res.json();
+            if (result.success) {
+                document.getElementById('urlStatusText').innerHTML = `⏳ ส่งลิงก์ไปยังเบอร์ <strong>${phone}</strong> สำเร็จ! กำลังรอคนไข้กด Approve...`;
+            } else {
+                alert('ส่ง SMS ไม่สำเร็จ: กรุณาตรวจสอบเครดิตใน SMS-KUB');
+            }
             addAuditLog('SYSTEM', 'SMS_URL_SENT', `Approval URL sent to ${phone}`);
-        } catch (e) { console.log("SMS-KUB Fallback mode active"); }
+        } catch (e) {
+            console.error(e);
+            alert('เกิดข้อผิดพลาดในการเชื่อมต่อ Proxy Server');
+        }
 
         // เริ่มฟังสัญญาณ Real-time จากหน้า approve.html
         startListeningStatus();
