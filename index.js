@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// --- ตั้งค่าข้อมูล ClickSend ของคุณ ---
 const CLICKSEND_CONFIG = {
     username: "santib521@gmail.com",
     apiKey: "2467C4C3-CF7F-51A9-676A-547CA8D2E71F"
@@ -22,7 +21,6 @@ app.post('/api/send-sms', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Missing phone or message' });
         }
 
-        // แปลงเบอร์โทรให้เป็นรูปแบบสากล (ClickSend รองรับเครื่องหมาย + เช่น +66813338900)
         let formattedPhone = phone.trim();
         if (formattedPhone.startsWith('0')) {
             formattedPhone = '+66' + formattedPhone.substring(1);
@@ -30,22 +28,19 @@ app.post('/api/send-sms', async (req, res) => {
             formattedPhone = '+' + formattedPhone;
         }
 
-        // ClickSend REST API Endpoint สำหรับส่ง SMS
         const clickSendUrl = 'https://rest.clicksend.com/v3/sms/send';
 
-        // รูปแบบ Payload ตามมาตรฐาน ClickSend API
         const payload = {
             messages: [
                 {
                     source: "node",
-                    from: "MKT_Hospital",
+                    // เอาพารามิเตอร์ from ออก เพื่อให้ ClickSend ใช้เบอร์กลางระบบส่งผ่านทันที ไม่ติด WaitApproval
                     body: message,
                     to: formattedPhone
                 }
             ]
         };
 
-        // ทำ Basic Authentication ด้วย Username และ API Key ของ ClickSend
         const authHeader = 'Basic ' + Buffer.from(`${CLICKSEND_CONFIG.username}:${CLICKSEND_CONFIG.apiKey}`).toString('base64');
 
         const response = await axios.post(clickSendUrl, payload, {
@@ -67,7 +62,7 @@ app.post('/api/send-sms', async (req, res) => {
     }
 });
 
-app.get('/', (devReq, res) => {
+app.get('/', (req, res) => {
     res.send('MKT Hospital ClickSend SMS Proxy Server is running.');
 });
 
