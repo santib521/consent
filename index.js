@@ -17,10 +17,10 @@ const TWILIO_CONFIG = {
 
 app.post('/api/send-sms', async (req, res) => {
     try {
-        const { phone } = req.body;
+        const { phone, message } = req.body;
 
-        if (!phone) {
-            return res.status(400).json({ success: false, message: 'Missing phone number' });
+        if (!phone || !message) {
+            return res.status(400).json({ success: false, message: 'Missing phone or message' });
         }
 
         let formattedPhone = phone.trim();
@@ -28,14 +28,13 @@ app.post('/api/send-sms', async (req, res) => {
             formattedPhone = '+66' + formattedPhone.substring(1);
         }
 
+        // ใช้ Messaging API endpoint มาตรฐาน (ไม่ใช่ Verify API)
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_CONFIG.accountSid}/Messages.json`;
 
         const params = new URLSearchParams();
         params.append('To', formattedPhone);
         params.append('From', TWILIO_CONFIG.twiliophoneNumber);
-        
-        // บังคับใช้ Template มาตรฐานที่ Twilio Trial อนุญาต
-        params.append('Body', 'sms_appointment_reminders');
+        params.append('Body', message); // ส่งข้อความตรงตามที่ส่งมาจากหน้าเว็บ
 
         const credentials = Buffer.from(`${TWILIO_CONFIG.apiKey}:${TWILIO_CONFIG.apiSecret}`).toString('base64');
 
@@ -46,11 +45,11 @@ app.post('/api/send-sms', async (req, res) => {
             }
         });
 
-        console.log(`SMS Trial Sent to ${formattedPhone}, SID: ${response.data.sid}`);
+        console.log(`SMS Sent Successfully to ${formattedPhone}, SID: ${response.data.sid}`);
         return res.json({ success: true, sid: response.data.sid });
 
     } catch (error) {
-        console.error('Twilio Trial Error Detail:', error.response?.data || error.message);
+        console.error('Twilio Messaging Error:', error.response?.data || error.message);
         return res.status(500).json({ 
             success: false, 
             error: error.response?.data || error.message 
