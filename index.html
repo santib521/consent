@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MKT Hospital e-Consent System (HA/JCI Standard + Twilio)</title>
+    <title>MKT Hospital e-Consent System (HA/JCI Standard + ClickSend)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -127,7 +127,7 @@
         </div>
         <div class="compliance-badges">
             <span>HA/JCI PFR.4</span>
-            <span>Twilio Live Proxy</span>
+            <span>ClickSend Live Proxy</span>
         </div>
     </header>
 
@@ -144,7 +144,7 @@
             </div>
             <div class="form-group">
                 <label>เบอร์มือถือผู้ป่วย (Phone Number)</label>
-                <input type="text" id="patientPhone" class="form-control" value="+66874999456">
+                <input type="text" id="patientPhone" class="form-control" value="0874999456">
             </div>
         </div>
 
@@ -166,7 +166,7 @@
     <!-- ส่วนเลือก Option ส่ง SMS -->
     <div class="auth-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-            <span style="font-size:11px; font-weight:bold;">🔐 เลือกรูปแบบการส่ง SMS ยืนยันตัวตน (ผ่าน Render Proxy)</span>
+            <span style="font-size:11px; font-weight:bold;">🔐 เลือกรูปแบบการส่ง SMS ยืนยันตัวตน (ผ่าน ClickSend Proxy)</span>
             <span id="authStatusBadge" class="badge-unverified">สถานะ: PENDING</span>
         </div>
 
@@ -178,7 +178,7 @@
         <!-- แผงส่ง OTP -->
         <div class="auth-box" id="modeOtpSection">
             <div id="otpRequestView">
-                <span style="color:var(--text-muted);">ส่งรหัส OTP 6 หลักผ่าน Twilio ไปยังมือถือคนไข้จริง</span><br>
+                <span style="color:var(--text-muted);">ส่งรหัส OTP 6 หลักผ่าน ClickSend ไปยังมือถือคนไข้จริง</span><br>
                 <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsOtpCode()">
                     📤 ส่ง SMS OTP ผ่าน Proxy
                 </button>
@@ -202,7 +202,7 @@
         <!-- แผงส่ง URL Link -->
         <div class="auth-box" id="modeUrlSection" style="display: none;">
             <div id="urlRequestView">
-                <span style="color:var(--text-muted);">ส่งข้อความแนบลิงก์หน้าจอ Approve ผ่าน Twilio ไปยังมือถือคนไข้จริง</span><br>
+                <span style="color:var(--text-muted);">ส่งข้อความแนบลิงก์หน้าจอ Approve ผ่าน ClickSend ไปยังมือถือคนไข้จริง</span><br>
                 <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsUrlLink()">
                     🔗 ส่ง SMS แนบลิงก์ผ่าน Proxy
                 </button>
@@ -358,6 +358,22 @@
         updateHash();
         initCanvasEvents(canvas, ctx, 'PATIENT');
         initCanvasEvents(wCanvas, wCtx, 'WITNESS');
+
+        // ตั้งค่าระบบกรอก OTP อัตโนมัติข้ามช่องและรองรับปุ่ม Backspace
+        const otpInputs = document.querySelectorAll('.otp-box');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (val && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
     };
 
     function toggleDrawer() {
@@ -375,7 +391,14 @@
         if (mode !== 'URL') stopListeningStatus();
     }
 
-    // Option A: ส่ง SMS แบบรหัส OTP ผ่าน Render Proxy (เชื่อมต่อ Twilio)
+    // ฟังก์ชันช่วยจัดการช่องกรอก OTP
+    function handleOtpInput(element, index) {
+        if (element.value.length > 1) {
+            element.value = element.value.charAt(element.value.length - 1);
+        }
+    }
+
+    // Option A: ส่ง SMS แบบรหัส OTP ผ่าน ClickSend Proxy
     async function sendSmsOtpCode() {
         const phone = document.getElementById('patientPhone').value.trim();
         const docId = document.getElementById('docRefId').innerText;
@@ -386,7 +409,7 @@
 
         document.getElementById('otpRequestView').style.display = 'none';
         document.getElementById('otpVerifyView').style.display = 'block';
-        document.getElementById('otpInstructionText').innerHTML = `📲 กำลังส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong>...`;
+        document.getElementById('otpInstructionText').innerHTML = `📲 กำลังส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> ผ่าน ClickSend...`;
 
         try {
             const res = await fetch(PROXY_URL, {
@@ -396,9 +419,9 @@
             });
             const result = await res.json();
             if (result.success) {
-                document.getElementById('otpInstructionText').innerHTML = `📲 ส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> ผ่าน Twilio สำเร็จ!`;
+                document.getElementById('otpInstructionText').innerHTML = `📲 ส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> สำเร็จ!`;
             } else {
-                alert('ส่ง SMS ผ่าน Twilio ไม่สำเร็จ: กรุณาตรวจสอบเบอร์ปลายทางหรือการตั้งค่า Proxy');
+                alert('ส่ง SMS ไม่สำเร็จ กรุณาตรวจสอบระบบ Proxy');
             }
             addAuditLog('SYSTEM', 'SMS_OTP_SENT', `OTP sent to ${phone}`);
         } catch (e) {
@@ -420,7 +443,7 @@
         markVerified('SMS_OTP_VERIFIED');
     }
 
-    // Option B: ส่ง SMS แบบลิงก์ URL ผ่าน Render Proxy (เชื่อมต่อ Twilio)
+    // Option B: ส่ง SMS แบบลิงก์ URL ผ่าน ClickSend Proxy
     async function sendSmsUrlLink() {
         const phone = document.getElementById('patientPhone').value.trim();
         const docId = document.getElementById('docRefId').innerText;
@@ -432,7 +455,7 @@
 
         document.getElementById('urlRequestView').style.display = 'none';
         document.getElementById('urlWaitingView').style.display = 'block';
-        document.getElementById('urlStatusText').innerHTML = `⏳ กำลังส่งลิงก์ไปยังเบอร์ <strong>${phone}</strong>...`;
+        document.getElementById('urlStatusText').innerHTML = `⏳ กำลังส่งลิงก์ไปยังเบอร์ <strong>${phone}</strong> ผ่าน ClickSend...`;
 
         try {
             const res = await fetch(PROXY_URL, {
@@ -444,7 +467,7 @@
             if (result.success) {
                 document.getElementById('urlStatusText').innerHTML = `⏳ ส่งลิงก์ไปยังเบอร์ <strong>${phone}</strong> สำเร็จ! กำลังรอคนไข้กด Approve...`;
             } else {
-                alert('ส่ง SMS ผ่าน Twilio ไม่สำเร็จ: กรุณาตรวจสอบเบอร์ปลายทางหรือการตั้งค่า Proxy');
+                alert('ส่ง SMS ไม่สำเร็จ กรุณาตรวจสอบระบบ Proxy');
             }
             addAuditLog('SYSTEM', 'SMS_URL_SENT', `Approval URL sent to ${phone}`);
         } catch (e) {
