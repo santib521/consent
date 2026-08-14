@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MKT Hospital e-Consent System (HA/JCI Standard + Dev Spec)</title>
+    <title>MKT Hospital e-Consent System (HA/JCI Standard + SMS-KUB)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -13,9 +13,7 @@
             --secondary: #0f172a;
             --accent: #10b981;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --bg: #f8fafc;
-            --card-bg: #ffffff;
             --border: #cbd5e1;
             --text: #1e293b;
             --text-muted: #64748b;
@@ -24,24 +22,14 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         html, body {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Sarabun', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            width: 100vw; height: 100vh; overflow: hidden;
+            font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: var(--text);
         }
 
         .main-layout {
-            max-width: 920px;
-            height: 100vh;
-            margin: 0 auto;
-            padding: 8px 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background: #ffffff;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            max-width: 920px; height: 100vh; margin: 0 auto; padding: 8px 12px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            background: #ffffff; box-shadow: 0 0 20px rgba(0,0,0,0.05);
         }
 
         header {
@@ -56,24 +44,19 @@
         }
 
         .patient-zone {
-            background: #f0f9ff;
-            border: 1.5px solid #bae6fd;
-            border-radius: 8px;
-            padding: 8px 10px;
-            margin-top: 4px;
+            background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; padding: 8px 10px; margin-top: 4px;
         }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .form-group { margin-bottom: 4px; }
         .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--primary-dark); margin-bottom: 1px; }
         .form-control {
-            width: 100%; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px;
-            font-family: 'Sarabun'; font-weight: 600;
+            width: 100%; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; font-family: 'Sarabun'; font-weight: 600;
         }
 
         .clause-box {
             background: #ffffff; border-left: 4px solid var(--primary); padding: 6px 10px; border-radius: 4px;
-            margin-top: 4px; font-size: 12px; line-height: 1.35; color: #0f172a; max-height: 110px; overflow-y: auto;
+            margin-top: 4px; font-size: 12px; line-height: 1.35; color: #0f172a; max-height: 100px; overflow-y: auto;
         }
         .pdpa-check { display: flex; align-items: center; gap: 6px; margin-top: 4px; cursor: pointer; font-size: 11px; }
 
@@ -82,28 +65,18 @@
         }
         .auth-tab-bar { display: flex; gap: 6px; margin-bottom: 4px; }
         .auth-tab-btn {
-            flex: 1; padding: 3px; border: 1px solid var(--border); background: #f8fafc; color: var(--text-muted);
+            flex: 1; padding: 4px; border: 1px solid var(--border); background: #f8fafc; color: var(--text-muted);
             border-radius: 4px; cursor: pointer; font-family: 'Prompt'; font-size: 11px; font-weight: 500;
         }
         .auth-tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
 
-        .auth-box { background: #f8fafc; border: 1px dashed var(--primary); padding: 4px 8px; border-radius: 6px; text-align: center; font-size: 11px; }
-        .otp-input-group { display: flex; justify-content: center; gap: 4px; margin: 2px 0; }
-        .otp-input-group input { width: 28px; height: 28px; text-align: center; font-size: 14px; font-weight: bold; border-radius: 4px; border: 1px solid #cbd5e1; }
+        .auth-box { background: #f8fafc; border: 1px dashed var(--primary); padding: 6px 8px; border-radius: 6px; text-align: center; font-size: 11px; }
+        .otp-input-group { display: flex; justify-content: center; gap: 6px; margin: 4px 0; }
+        .otp-input-group input { width: 32px; height: 32px; text-align: center; font-size: 16px; font-weight: bold; border-radius: 4px; border: 1px solid #cbd5e1; }
 
-        .signature-grid-layout {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 8px;
-            margin-top: 4px;
-        }
-
-        .sig-card {
-            background: #ffffff; border: 1.5px solid var(--border); border-radius: 6px; padding: 6px;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
+        .signature-grid-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-top: 4px; }
+        .sig-card { background: #ffffff; border: 1.5px solid var(--border); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; }
         .sig-card.staff-zone { background: #f8fafc; }
-
         .sig-title { font-family: 'Prompt'; font-size: 11px; font-weight: 600; color: var(--secondary); margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center; }
 
         .canvas-container { position: relative; border: 1.5px dashed #94a3b8; border-radius: 4px; background: #ffffff; height: 75px; }
@@ -111,17 +84,12 @@
         .canvas-status-disabled {
             position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(248,250,252,0.92);
             display: flex; justify-content: center; align-items: center; color: var(--text-muted); font-size: 11px;
-            font-weight: 600; backdrop-filter: blur(1px); border-radius: 4px;
+            font-weight: 600; z-index: 10;
         }
 
-        .nurse-stamp-box {
-            background: #f0fdf4; border: 1px solid #86efac; padding: 4px; border-radius: 4px; font-size: 10px; color: #166534; text-align: center;
-        }
+        .nurse-stamp-box { background: #f0fdf4; border: 1px solid #86efac; padding: 4px; border-radius: 4px; font-size: 10px; color: #166534; text-align: center; }
 
-        .btn {
-            padding: 5px 10px; border: none; border-radius: 4px; font-size: 11px; font-weight: 600;
-            font-family: 'Prompt'; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 4px;
-        }
+        .btn { padding: 5px 10px; border: none; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: 'Prompt'; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 4px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--accent); color: white; }
         .btn-success:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
@@ -131,14 +99,8 @@
         .badge-verified { background: #dcfce7; color: #166534; padding: 1px 5px; border-radius: 6px; font-size: 9px; font-weight: 600; }
         .badge-unverified { background: #fee2e2; color: #991b1b; padding: 1px 5px; border-radius: 6px; font-size: 9px; font-weight: 600; }
 
-        .drawer-toggle-btn {
-            position: fixed; right: 0; top: 80px; background: var(--secondary); color: #38bdf8; border: none;
-            padding: 6px 10px; border-radius: 6px 0 0 6px; font-family: 'Prompt'; font-size: 10px; font-weight: 600; cursor: pointer; z-index: 100;
-        }
-        .slide-drawer {
-            position: fixed; right: -380px; top: 0; width: 360px; height: 100vh; background: #ffffff;
-            box-shadow: -4px 0 20px rgba(0,0,0,0.15); z-index: 200; transition: right 0.3s; overflow-y: auto; padding: 14px; border-left: 1px solid var(--border);
-        }
+        .drawer-toggle-btn { position: fixed; right: 0; top: 80px; background: var(--secondary); color: #38bdf8; border: none; padding: 6px 10px; border-radius: 6px 0 0 6px; font-family: 'Prompt'; font-size: 10px; font-weight: 600; cursor: pointer; z-index: 100; }
+        .slide-drawer { position: fixed; right: -380px; top: 0; width: 360px; height: 100vh; background: #ffffff; box-shadow: -4px 0 20px rgba(0,0,0,0.15); z-index: 200; transition: right 0.3s; overflow-y: auto; padding: 14px; border-left: 1px solid var(--border); }
         .slide-drawer.open { right: 0; }
         .drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.4); z-index: 150; }
         .drawer-overlay.open { display: block; }
@@ -150,6 +112,9 @@
         .pdf-content-body { padding: 20px; font-size: 12px; color: #1e293b; line-height: 1.5; background: #ffffff; }
         .pdf-sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .pdf-sign-box { border: 1px dashed #94a3b8; border-radius: 6px; padding: 8px; text-align: center; background: #f8fafc; }
+        .audit-table { width: 100%; font-size: 9px; border-collapse: collapse; margin-top: 4px; }
+        .audit-table th, .audit-table td { border: 1px solid #cbd5e1; padding: 3px; text-align: left; }
+        .audit-table th { background: #f1f5f9; }
     </style>
 </head>
 <body>
@@ -162,8 +127,7 @@
         </div>
         <div class="compliance-badges">
             <span>HA/JCI PFR.4</span>
-            <span>e-Transactions Sec 26/28</span>
-            <span>PAdES PKI Sealed</span>
+            <span>SMS-KUB Live</span>
         </div>
     </header>
 
@@ -179,65 +143,74 @@
                 <input type="text" id="patientName" class="form-control" value="นายสมชาย ใจดี" oninput="updateHash()">
             </div>
             <div class="form-group">
-                <label>เลขประจำตัวผู้ป่วย (HN / Citizen ID)</label>
-                <input type="text" id="patientHN" class="form-control" value="HN 69-001234 / 1-1002-XXXXX-12-1" oninput="updateHash()">
+                <label>เบอร์มือถือผู้ป่วย (Phone Number)</label>
+                <input type="text" id="patientPhone" class="form-control" value="0813338900">
             </div>
         </div>
 
         <div class="clause-box">
             <div style="font-weight:700; color:var(--primary-dark); margin-bottom:2px;">
-                [บังคับ] หนังสือแสดงความยินยอมยินยอมรับการทำหัตถการ: <span id="procedureTitleText">"การผ่าตัดส่องกล้องถุงน้ำดี (Laparoscopic Cholecystectomy)"</span>
+                [บังคับ] หนังสือแสดงความยินยอมรับการทำหัตถการ: <span id="procedureTitleText">"การผ่าตัดส่องกล้องถุงน้ำดี (Laparoscopic Cholecystectomy)"</span>
             </div>
-            1. ข้าพเจ้าได้รับการอธิบายจากแพทย์เกี่ยวกับ **วัตถุประสงค์ ขั้นตอนการผ่าตัด/หัตถการ ประโยชน์ที่คาดว่าจะได้รับ และทางเลือกอื่นในการรักษา** เรียบร้อยแล้ว<br>
-            2. ข้าพเจ้ารับทราบว่าการทำหัตถการมีความเสี่ยงที่อาจเกิดขึ้น ได้แก่ **ภาวะเลือดออก, การติดเชื้อ, ภาวะแทรกซ้อนจากการยาสลบ/ยาชา หรือการบาดเจ็บต่ออวัยวะข้างเคียง**<br>
-            3. ข้าพเจ้าได้มีโอกาสซักถามข้อสงสัยจากแพทย์ และได้รับคำตอบเป็นที่พอใจแล้ว จึงลงลายมือชื่อไว้เป็นหลักฐานด้วยความสมัครใจ
+            1. ข้าพเจ้าได้รับการอธิบายจากแพทย์เกี่ยวกับวัตถุประสงค์ ขั้นตอนการทำหัตถการ และประโยชน์ที่คาดว่าจะได้รับ<br>
+            2. ข้าพเจ้ารับทราบความเสี่ยงและภาวะแทรกซ้อนที่อาจเกิดขึ้น และได้รับคำตอบเป็นที่พอใจแล้ว
             <input type="hidden" id="procedureTitle" value="การผ่าตัดส่องกล้องถุงน้ำดี (Laparoscopic Cholecystectomy)">
         </div>
 
         <label class="pdpa-check">
             <input type="checkbox" id="consentMarketing" onchange="updateHash()">
-            <span>[สมัครใจ] ยินยอมเปิดเผยข้อมูลสุขภาพเพื่อการศึกษาวิจัยและการปรับปรุงการบริการ (PDPA Optional Consent)</span>
+            <span>[สมัครใจ] ยินยอมเปิดเผยข้อมูลสุขภาพเพื่อการศึกษาวิจัย (PDPA Optional Consent)</span>
         </label>
     </div>
 
+    <!-- ส่วนเลือก Option ส่ง SMS -->
     <div class="auth-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-            <span style="font-size:11px; font-weight:bold;">🔐 การยืนยันตัวตนคนไข้ก่อนลงนาม (Signer Control)</span>
-            <span id="authStatusBadge" class="badge-unverified">ยังไม่ยืนยันตัวตน</span>
+            <span style="font-size:11px; font-weight:bold;">🔐 เลือกรูปแบบการส่ง SMS ยืนยันตัวตน (SMS-KUB Gateway)</span>
+            <span id="authStatusBadge" class="badge-unverified">สถานะ: PENDING</span>
         </div>
 
         <div class="auth-tab-bar">
-            <button type="button" class="auth-tab-btn active" id="tabQr" onclick="switchAuthTab('QR')">📱 1. Scan QR Code Approve</button>
-            <button type="button" class="auth-tab-btn" id="tabOtp" onclick="switchAuthTab('OTP')">📲 2. SMS OTP Code</button>
+            <button type="button" class="auth-tab-btn active" id="tabOtp" onclick="switchSmsMode('OTP')">📲 Option A: ส่งรหัส OTP 6 หลัก</button>
+            <button type="button" class="auth-tab-btn" id="tabUrl" onclick="switchSmsMode('URL')">🔗 Option B: ส่งลิงก์ URL ให้กด Approve</button>
         </div>
 
-        <div class="auth-box" id="authQrSection">
-            <div id="qrInitialState">
-                <span style="color:var(--text-muted);">กดปุ่มเพื่อสร้าง QR Code สำหรับให้คนไข้สแกนยืนยันตัวตนผ่านมือถือ</span><br>
-                <button type="button" class="btn btn-primary" style="font-size:10px; padding:3px 10px; margin-top:3px;" onclick="generateQrCodeStream()">
-                    ⚡ กดเพื่อสร้าง QR Code ยืนยันตัวตน
+        <!-- แผงส่ง OTP -->
+        <div class="auth-box" id="modeOtpSection">
+            <div id="otpRequestView">
+                <span style="color:var(--text-muted);">ส่งรหัส OTP 6 หลักผ่าน SMS-KUB ไปยังมือถือคนไข้</span><br>
+                <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsOtpCode()">
+                    📤 ส่ง SMS OTP จริง
                 </button>
             </div>
-            <div id="qrActiveState" style="display: none;">
-                <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
-                    <img id="liveQrImage" src="" alt="QR Code" width="65" height="65">
-                    <div style="text-align:left;">
-                        <strong>เอามือถือสแกน QR Code นี้ เพื่อกด Approve</strong>
-                        <div style="font-size:9px; color:#0369a1;">⚡ สตรีมสัญญาณ Real-time พร้อมรับคำตอบทันทีเมื่อสแกนจริง</div>
-                        <button type="button" class="btn btn-secondary" style="font-size:9px; padding:1px 5px; margin-top:2px;" onclick="verifySignerIdentity('MOBILE_QR_SIMULATE')">(กดจำลองผล Approve)</button>
-                    </div>
+            <div id="otpVerifyView" style="display: none;">
+                <span id="otpInstructionText" style="font-weight:bold; color:var(--primary-dark);">กรอกรหัส OTP 6 หลักที่ได้รับ</span>
+                <div class="otp-input-group">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 0)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 1)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 2)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 3)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 4)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 5)">
                 </div>
+                <button type="button" class="btn btn-success" style="font-size:10px; padding: 3px 12px;" onclick="verifyOtpCode()">
+                    ✅ ยืนยัน OTP (Verify Signer)
+                </button>
             </div>
         </div>
 
-        <div class="auth-box" id="authOtpSection" style="display: none;">
-            <span>ยืนยันตัวตนผู้ลงนามผ่าน SMS OTP (เบอร์ 081-XXX-8900)</span>
-            <div class="otp-input-group">
-                <input type="text" maxlength="1" value="8"><input type="text" maxlength="1" value="9">
-                <input type="text" maxlength="1" value="2"><input type="text" maxlength="1" value="1">
-                <input type="text" maxlength="1" value="0"><input type="text" maxlength="1" value="5">
+        <!-- แผงส่ง URL Link -->
+        <div class="auth-box" id="modeUrlSection" style="display: none;">
+            <div id="urlRequestView">
+                <span style="color:var(--text-muted);">ส่งข้อความแนบลิงก์หน้าจอ Approve ไปยังมือถือคนไข้</span><br>
+                <button type="button" class="btn btn-primary" style="font-size:10px; padding:4px 12px; margin-top:4px;" onclick="sendSmsUrlLink()">
+                    🔗 ส่ง SMS แนบลิงก์ (Approval Link)
+                </button>
             </div>
-            <button type="button" class="btn btn-primary" style="font-size:10px; padding: 2px 10px;" onclick="verifySignerIdentity('SMS_OTP')">ยืนยัน OTP (Verify Signer)</button>
+            <div id="urlWaitingView" style="display: none;">
+                <span style="font-weight:bold; color:#0369a1;" id="urlStatusText">⏳ ส่งลิงก์สำเร็จแล้ว กำลังรอคนไข้กด Approve...</span>
+                <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">ระบบกำลังสตรีมสัญญาณตอบรับแบบ Real-time</div>
+            </div>
         </div>
     </div>
 
@@ -251,7 +224,7 @@
                 <div class="canvas-container">
                     <canvas id="sigCanvas"></canvas>
                     <div class="canvas-status-disabled" id="canvasDisabledOverlay">
-                        🔒 กรุณายืนยันตัวตน QR / OTP ด้านบนก่อน
+                        🔒 กรุณายืนยันตัวตนผ่าน SMS ด้านบนก่อน
                     </div>
                 </div>
                 <div style="font-size:9px; color:var(--primary); font-weight:bold; margin-top:1px;">Binding ID: <span id="bindingToken">PENDING</span></div>
@@ -262,7 +235,7 @@
                     <span>✍️ ลายมือชื่อ พยาน (ญาติ / ผู้ร่วมรับฟัง)</span>
                     <button type="button" class="btn btn-secondary" style="font-size:9px; padding:1px 5px;" onclick="clearWitnessCanvas()">ล้าง</button>
                 </div>
-                <div class="canvas-container" style="height: 45px;">
+                <div class="canvas-container" style="height: 40px;">
                     <canvas id="witnessCanvas"></canvas>
                 </div>
             </div>
@@ -276,7 +249,7 @@
                 </div>
                 <div class="nurse-stamp-box">
                     <strong>พว. สมหญิง รักสงบ (ว. 98124)</strong>
-                    <div style="font-size:9px; color:#475569;">พยาบาลประจำหอผู้ป่วย IPD 5A (Auto-Stamp)</div>
+                    <div style="font-size:9px; color:#475569;">หอผู้ป่วย IPD 5A (Auto-Stamp)</div>
                 </div>
             </div>
 
@@ -286,12 +259,8 @@
                     <span id="doctorSignStatus" class="badge-unverified">รอแพทย์ลงนาม</span>
                 </div>
                 <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:2px; text-align:center;">
-                    <svg width="100" height="22" viewBox="0 0 200 50" style="display:block; margin:0 auto;">
-                        <path d="M 10 35 Q 30 5, 50 30 T 90 20 T 130 35 T 170 15" stroke="#0284c7" stroke-width="3" fill="none"/>
-                    </svg>
-                    <div style="font-size:10px; font-weight:bold;">นพ. วิชัย วาณิชกุล (ว. 45219)</div>
+                    <div style="font-size:10px; font-weight:bold; padding:2px;">นพ. วิชัย วาณิชกุล (ว. 45219)</div>
                 </div>
-
                 <div style="display:flex; gap:4px; margin-top:3px;">
                     <input type="password" id="doctorPin" value="123456" style="width:45px; text-align:center; font-size:10px; border:1px solid #cbd5e1; border-radius:4px;">
                     <button type="button" class="btn btn-primary" style="flex:1; font-size:10px; padding:3px;" onclick="executeDoctorPKISign()">🔑 ประทับตรา PKI Seal</button>
@@ -303,7 +272,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px; padding-top:2px; border-top:1px solid var(--border);">
         <span style="font-size:10px; color:var(--text-muted);" id="stepCheckStatus">📌 สถานะ: รอลงนามให้ครบทุกขั้นตอน</span>
         <button type="button" class="btn btn-success" id="btnSaveComplete" disabled style="font-size:12px; padding:5px 20px;" onclick="executeSaveAndPreview()">
-            💾 Save (ประทับตราดิจิทัลสมบูรณ์ & สร้าง PDF)
+            💾 Save (สร้าง PDF สมบูรณ์)
         </button>
     </div>
 </div>
@@ -316,29 +285,12 @@
         <h3 style="font-size: 14px; color: var(--secondary);">🔍 Cryptographic Inspector</h3>
         <button onclick="toggleDrawer()" style="border:none; background:none; font-size:18px; cursor:pointer;">✕</button>
     </div>
-
-    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted);">1. Document Payload SHA-256 Hash:</div>
+    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted);">1. Document SHA-256 Hash:</div>
     <div class="hash-box" id="docHashDisplay">Calculating...</div>
-
-    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 8px;">2. Patient Signature Binding Token:</div>
+    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 8px;">2. Signature Binding Token:</div>
     <div class="hash-box" id="bindingHashDisplay" style="color: #a7f3d0;">Awaiting Signature...</div>
-
-    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 8px;">3. Doctor PKI Seal Hash (Layer 2):</div>
-    <div class="hash-box" id="doctorPKIHashDisplay" style="color: #fef08a;">Pending Doctor Sign...</div>
-
-    <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 8px;">4. TSA Time-Stamp Stamp:</div>
-    <div style="font-size: 10px; background: #f1f5f9; padding: 6px; border-radius: 6px; font-family: monospace;" id="tsaDisplay">
-        Time: 2026-07-23T11:00:00+07:00<br>TSA Authority: Thai National TSA (RFC 3161)
-    </div>
-
-    <div style="background: #fff1f2; border: 1px dashed var(--danger); padding: 8px; border-radius: 6px; margin-top: 12px;">
-        <strong style="color: var(--danger); font-size: 11px;">🧪 ทดลองการแก้ไขเอกสาร (Tamper Test)</strong>
-        <button type="button" class="btn btn-secondary" style="font-size: 10px; width:100%; margin-top:4px;" onclick="simulateTamper()">⚠️ ลองแอบแก้ไขข้อความในเอกสาร</button>
-    </div>
-
     <hr style="margin: 12px 0; border: none; border-top: 1px solid var(--border);">
-
-    <h4 style="font-size: 12px; margin-bottom: 6px;">📜 Immutable Audit Log</h4>
+    <h4 style="font-size: 12px; margin-bottom: 6px;">📜 Audit Log</h4>
     <table class="audit-table">
         <thead><tr><th>Time</th><th>Actor</th><th>Action</th></tr></thead>
         <tbody id="auditLogBody"><tr><td>11:00:00</td><td>SYSTEM</td><td>DOC_CREATED</td></tr></tbody>
@@ -348,44 +300,33 @@
 <div class="pdf-modal" id="pdfPreviewModal">
     <div class="pdf-paper">
         <div class="pdf-header-bar">
-            <div style="font-size:13px;">📄 ตัวอย่างเอกสาร e-Consent PDF/A ที่ประทับตราดิจิทัลสมบูรณ์ (PAdES Sealed)</div>
+            <div style="font-size:13px;">📄 ตัวอย่างเอกสาร e-Consent PDF/A (PAdES Sealed)</div>
             <div style="display:flex; gap:8px;">
-                <button class="btn btn-download" style="padding: 4px 10px; font-size: 11px;" onclick="downloadRealSignedPDF()">📥 ดาวน์โหลดไฟล์ Signed PDF (เปิดใน Adobe มี Signature Panel)</button>
+                <button class="btn btn-download" style="padding: 4px 10px; font-size: 11px;" onclick="downloadPDF()">📥 ดาวน์โหลด PDF</button>
                 <button onclick="closePdfPreview()" style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">✕</button>
             </div>
         </div>
-
         <div class="pdf-content-body" id="pdfExportArea">
-            <div class="pdf-hospital-header" style="text-align:center; border-bottom:2px solid #0284c7; padding-bottom:10px; margin-bottom:15px;">
-                <h2 style="font-size:18px; color:#0284c7;">โรงพยาบาล MKT Hospital (MKT Digital Hospital)</h2>
-                <p style="font-size:12px;">หนังสือแสดงความยินยอมเข้ารับการตรวจรักษาและทำหัตถการ (e-Informed Consent)</p>
-                <p style="font-size:10px; color:#94a3b8;">Document Reference No: <span id="pdfDocRef">CN-2026-88914</span></p>
+            <div style="text-align:center; border-bottom:2px solid #0284c7; padding-bottom:10px; margin-bottom:15px;">
+                <h2 style="font-size:18px; color:#0284c7;">โรงพยาบาล MKT Hospital</h2>
+                <p style="font-size:12px;">หนังสือแสดงความยินยอมเข้ารับการตรวจรักษา (e-Informed Consent)</p>
+                <p style="font-size:10px; color:#94a3b8;">Ref No: <span id="pdfDocRef">CN-2026-88914</span></p>
             </div>
-
             <div style="margin-bottom: 15px; font-size:12px;">
                 <p><strong>ชื่อ-นามสกุล ผู้ป่วย:</strong> <span id="pdfPatientName">-</span></p>
-                <p><strong>เลขประจำตัวผู้ป่วย (HN):</strong> <span id="pdfPatientHN">-</span></p>
-                <p><strong>หัตถการ / การรักษา:</strong> <span id="pdfProcedure">-</span></p>
+                <p><strong>เบอร์โทรศัพท์:</strong> <span id="pdfPatientPhone">-</span></p>
+                <p><strong>หัตถการ:</strong> <span id="pdfProcedure">-</span></p>
             </div>
-
-            <div style="background: #f8fafc; padding: 10px; border-radius: 6px; border-left: 3px solid #0284c7; font-size: 11px; margin-bottom: 15px; line-height: 1.5;">
-                <strong>เงื่อนไขความยินยอมมาตรฐาน HA/JCI:</strong> ข้าพเจ้าได้รับการอธิบายจากแพทย์เกี่ยวกับวัตถุประสงค์ ขั้นตอน ประโยชน์ ความเสี่ยง และทางเลือกในการรักษาเรียบร้อยแล้ว ได้มีโอกาสซักถามข้อสงสัยและยินยอมให้แพทย์ทำการรักษาด้วยความสมัครใจ
-            </div>
-
             <div class="pdf-sign-grid">
                 <div class="pdf-sign-box">
-                    <div style="font-size: 11px; font-weight: bold; color: #475569;">ลายเซ็นผู้ป่วย / ผู้มีอำนาจลงนาม</div>
-                    <img id="pdfPatientSigImg" src="" alt="Patient Signature" style="max-height: 40px; margin: 4px auto; display:block;">
-                    <div style="font-size: 10px; color: #0284c7; font-weight: bold;" id="pdfPatientBindingText">BIND-PATIENT-XXXX</div>
-                    <div style="font-size: 9px; color: #94a3b8;" id="pdfAuthMethodText">ยืนยันตัวตนผ่าน SMS OTP / QR Scan</div>
+                    <div style="font-size: 11px; font-weight: bold; color: #475569;">ลายเซ็นผู้ป่วย</div>
+                    <img id="pdfPatientSigImg" src="" alt="Signature" style="max-height: 40px; margin: 4px auto; display:block;">
+                    <div style="font-size: 10px; color: #0284c7; font-weight: bold;" id="pdfPatientBindingText">BIND-PATIENT</div>
                 </div>
-
                 <div class="pdf-sign-box" style="border: 2px solid #0284c7; background: #f0f9ff;">
                     <div style="font-size: 11px; font-weight: bold; color: #0369a1;">ลายเซ็นแพทย์ (2-Layer Signed)</div>
                     <div style="font-size: 12px; font-weight: bold; color: #0f172a; margin-top:2px;">( นพ. วิชัย วาณิชกุล )</div>
-                    <div style="font-size: 9px; color: #166534; background: #dcfce7; padding: 2px; border-radius: 4px; margin-top: 4px;">
-                        🔒 PAdES Cryptographic Seal (TH-MED-2026-99012)
-                    </div>
+                    <div style="font-size: 9px; color: #166534; background: #dcfce7; padding: 2px; border-radius: 4px; margin-top: 4px;">🔒 PAdES Digital Seal</div>
                 </div>
             </div>
         </div>
@@ -393,54 +334,21 @@
 </div>
 
 <script>
-/*
-================================================================================
-👨‍💻 DEV BACKEND IMPLEMENTATION SPECIFICATION & PSEUDO CODE (MKT e-CONSENT)
-================================================================================
-คำชี้แจงสำหรับนักพัฒนา (Developer Guide):
-ไฟล์นี้แสดง Logic ฝั่ง Client-Side ร่วมกับ Spec การเขียน Back-End API (Node.js/C#)
-เพื่อรองรับกฎหมาย พ.ร.บ. ธุรกรรมทางอิเล็กทรอนิกส์ (มาตรา 26/28) และการตรวจเคลมจากบริษัทประกันภัย
-
---------------------------------------------------------------------------------
-1. DATABASE SCHEMA DESIGN (PostgreSQL / MySQL):
---------------------------------------------------------------------------------
-CREATE TABLE consent_transactions (
-    consent_id VARCHAR(50) PRIMARY KEY,          -- e.g. "CN-2026-88914"
-    hn VARCHAR(50) NOT NULL,                    -- เลข HN คนไข้
-    patient_name VARCHAR(255) NOT NULL,
-    procedure_title TEXT NOT NULL,
-    doc_payload_hash VARCHAR(64) NOT NULL,      -- SHA-256 ของข้อความเนื้อหา Consent
-    auth_method VARCHAR(20),                    -- 'SMS_OTP' หรือ 'MOBILE_QR'
-    auth_transaction_id VARCHAR(100),           -- Gateway Ref ID หรือ QR Session UUID
-    signer_ip VARCHAR(45),                      -- IP Address มือถือคนไข้
-    signer_user_agent TEXT,                     -- Device/Browser Header ของคนไข้
-    signer_binding_token VARCHAR(64),           -- SHA-256 Dynamic Binding Token
-    patient_canvas_data TEXT,                   -- Base64 Vector ลายเซ็นคนไข้
-    doctor_pki_hash VARCHAR(64),                -- Hash จาก Cloud HSM (PAdES Seal)
-    status VARCHAR(20) DEFAULT 'DRAFT',         -- 'DRAFT', 'PATIENT_SIGNED', 'COMPLETED'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE consent_audit_logs (
-    log_id BIGSERIAL PRIMARY KEY,
-    consent_id VARCHAR(50) REFERENCES consent_transactions(consent_id),
-    actor VARCHAR(50) NOT NULL,                 -- 'PATIENT', 'NURSE', 'DOCTOR', 'SYSTEM'
-    action VARCHAR(50) NOT NULL,                -- 'DOC_CREATED', 'AUTH_VERIFIED', 'PATIENT_SIGNED', 'PKI_SEALED'
-    details JSONB NOT NULL,                     -- บันทึก IP, UserAgent, Gateway Ref
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
--- *หมายเหตุ: ตาราง consent_audit_logs ห้ามมีคำสั่ง UPDATE หรือ DELETE (Append-Only)
-*/
+    // Config ค่า API ของ SMS-KUB
+    const SMSKUB_CONFIG = {
+        endpoint: "https://console.sms-kub.com/api",
+        apiKey: "gK6sDWwzsMWe7w9tpVirKIrNfqj5j9jH"
+    };
 
     let isSignerVerified = false;
-    let authMethodUsed = 'MOBILE_QR';
-    let currentAuthTransactionId = ''; // จะถูกเติมเมื่อผ่าน Signer Control (Gateway Ref ID / Session UUID)
+    let selectedSmsMode = 'OTP'; // 'OTP' หรือ 'URL'
+    let currentAuthTransactionId = '';
     let isPatientSigned = false;
     let isDoctorSigned = false;
     let canvas, ctx, isDrawing = false;
     let wCanvas, wCtx, isDrawingW = false;
+    let generatedOtpCode = '892105';
     let eventSource = null;
-
     const NTFY_TOPIC = 'mkt_consent_demo_88914';
 
     window.onload = function() {
@@ -448,12 +356,9 @@ CREATE TABLE consent_audit_logs (
         ctx = canvas.getContext('2d');
         wCanvas = document.getElementById('witnessCanvas');
         wCtx = wCanvas.getContext('2d');
-
         resizeCanvas(canvas);
         resizeCanvas(wCanvas);
         updateHash();
-        addAuditLog('SYSTEM', 'DOC_INITIATED', 'Document initialized');
-
         initCanvasEvents(canvas, ctx, 'PATIENT');
         initCanvasEvents(wCanvas, wCtx, 'WITNESS');
     };
@@ -463,30 +368,111 @@ CREATE TABLE consent_audit_logs (
         document.getElementById('drawerOverlay').classList.toggle('open');
     }
 
-    function switchAuthTab(mode) {
-        authMethodUsed = mode;
-        document.getElementById('tabQr').classList.toggle('active', mode === 'QR');
+    // ฟังก์ชันสลับ Option ระหว่าง OTP และ URL
+    function switchSmsMode(mode) {
+        selectedSmsMode = mode;
         document.getElementById('tabOtp').classList.toggle('active', mode === 'OTP');
-        document.getElementById('authQrSection').style.display = mode === 'QR' ? 'block' : 'none';
-        document.getElementById('authOtpSection').style.display = mode === 'OTP' ? 'block' : 'none';
+        document.getElementById('tabUrl').classList.toggle('active', mode === 'URL');
+        document.getElementById('modeOtpSection').style.display = mode === 'OTP' ? 'block' : 'none';
+        document.getElementById('modeUrlSection').style.display = mode === 'URL' ? 'block' : 'none';
 
-        if (mode !== 'QR') stopListeningStatus();
+        if (mode !== 'URL') stopListeningStatus();
     }
 
-    function generateQrCodeStream() {
-        document.getElementById('qrInitialState').style.display = 'none';
-        document.getElementById('qrActiveState').style.display = 'block';
-        
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=65x65&data=https://santib521.github.io/consent/approve.html?doc=CN-2026-88914`;
-        document.getElementById('liveQrImage').src = qrUrl;
+    // Option A: ส่ง SMS แบบรหัส OTP ผ่าน SMS-KUB API
+    async function sendSmsOtpCode() {
+        const phone = document.getElementById('patientPhone').value.trim();
+        const docId = document.getElementById('docRefId').innerText;
+        if (!phone) { alert('กรุณากรอกเบอร์โทรศัพท์มือถือ'); return; }
 
+        generatedOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const msg = `รหัส OTP ยืนยัน e-Consent ของคุณคือ: ${generatedOtpCode} (Ref: ${docId})`;
+
+        document.getElementById('otpRequestView').style.display = 'none';
+        document.getElementById('otpVerifyView').style.display = 'block';
+        document.getElementById('otpInstructionText').innerHTML = `📲 ส่งรหัส OTP ไปยังเบอร์ <strong>${phone}</strong> แล้ว (รหัสทดสอบ: ${generatedOtpCode})`;
+
+        try {
+            await fetch(`${SMSKUB_CONFIG.endpoint}/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SMSKUB_CONFIG.apiKey}` },
+                body: JSON.stringify({ apiKey: SMSKUB_CONFIG.apiKey, to: phone, message: msg })
+            });
+            addAuditLog('SYSTEM', 'SMS_OTP_SENT', `OTP sent to ${phone}`);
+        } catch (e) { console.log("SMS-KUB Fallback mode active"); }
+    }
+
+    // ยืนยันรหัส OTP ที่คนไข้กรอก
+    function verifyOtpCode() {
+        const inputs = document.querySelectorAll('.otp-box');
+        let entered = '';
+        inputs.forEach(i => entered += i.value);
+
+        if (entered !== generatedOtpCode) {
+            alert(`❌ รหัส OTP ไม่ถูกต้อง (รหัสคือ: ${generatedOtpCode})`);
+            return;
+        }
+
+        markVerified('SMS_OTP_VERIFIED');
+    }
+
+    // Option B: ส่ง SMS แบบลิงก์ URL ผ่าน SMS-KUB API
+    async function sendSmsUrlLink() {
+        const phone = document.getElementById('patientPhone').value.trim();
+        const docId = document.getElementById('docRefId').innerText;
+        const patientName = document.getElementById('patientName').value.trim();
+        if (!phone) { alert('กรุณากรอกเบอร์โทรศัพท์มือถือ'); return; }
+
+        const approvalUrl = `https://santib521.github.io/consent/approve.html?doc=${docId}&name=${encodeURIComponent(patientName)}`;
+        const msg = `รพ.MKT ยืนยันตัวตน e-Consent ของคุณ (${patientName}) กรุณากดลิงก์เพื่อ Approve: ${approvalUrl}`;
+
+        document.getElementById('urlRequestView').style.display = 'none';
+        document.getElementById('urlWaitingView').style.display = 'block';
+
+        try {
+            await fetch(`${SMSKUB_CONFIG.endpoint}/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SMSKUB_CONFIG.apiKey}` },
+                body: JSON.stringify({ apiKey: SMSKUB_CONFIG.apiKey, to: phone, message: msg })
+            });
+            addAuditLog('SYSTEM', 'SMS_URL_SENT', `Approval URL sent to ${phone}`);
+        } catch (e) { console.log("SMS-KUB Fallback mode active"); }
+
+        // เริ่มฟังสัญญาณ Real-time จากหน้า approve.html
         startListeningStatus();
     }
 
-    function resizeCanvas(c) {
-        c.width = c.parentElement.clientWidth;
-        c.height = c.parentElement.clientHeight;
+    // ฟังสัญญาณ Real-time เมื่อคนไข้กด Approve จากมือถือ
+    function startListeningStatus() {
+        stopListeningStatus();
+        try {
+            eventSource = new EventSource(`https://ntfy.sh/${NTFY_TOPIC}/sse`);
+            eventSource.onmessage = (event) => {
+                if (event.data && event.data.includes('APPROVED')) {
+                    markVerified('MOBILE_URL_APPROVED');
+                }
+            };
+        } catch (e) { console.error(e); }
     }
+
+    function stopListeningStatus() {
+        if (eventSource) { eventSource.close(); eventSource = null; }
+    }
+
+    function markVerified(method) {
+        isSignerVerified = true;
+        stopListeningStatus();
+        currentAuthTransactionId = "TX-" + Math.random().toString(36).substring(7).toUpperCase();
+
+        document.getElementById('authStatusBadge').className = 'badge-verified';
+        document.getElementById('authStatusBadge').innerText = '✅ สถานะ: VERIFIED (ยืนยันตัวตนสำเร็จ)';
+        document.getElementById('canvasDisabledOverlay').style.display = 'none';
+        addAuditLog('PATIENT', 'AUTH_VERIFIED', `Verified via ${method}`);
+        checkFormCompletion();
+        alert('✅ ยืนยันตัวตนสำเร็จ! ช่องลงลายเซ็นถูกปลดล็อกแล้ว');
+    }
+
+    function resizeCanvas(c) { c.width = c.parentElement.clientWidth; c.height = c.parentElement.clientHeight; }
 
     function initCanvasEvents(c, context, target) {
         const start = (e) => {
@@ -501,20 +487,11 @@ CREATE TABLE consent_audit_logs (
             draw(e, c, context);
         };
         const stop = () => {
-            if (target === 'PATIENT') { 
-                isDrawing = false; 
-                isPatientSigned = true;
-                updateBindingToken(); 
-                checkFormCompletion();
-            }
+            if (target === 'PATIENT') { isDrawing = false; isPatientSigned = true; updateBindingToken(); checkFormCompletion(); }
             if (target === 'WITNESS') isDrawingW = false;
             context.beginPath();
         };
-
-        c.addEventListener('mousedown', start);
-        c.addEventListener('mousemove', move);
-        c.addEventListener('mouseup', stop);
-
+        c.addEventListener('mousedown', start); c.addEventListener('mousemove', move); c.addEventListener('mouseup', stop);
         c.addEventListener('touchstart', (e) => { e.preventDefault(); start(e.touches[0]); });
         c.addEventListener('touchmove', (e) => { e.preventDefault(); move(e.touches[0]); });
         c.addEventListener('touchend', stop);
@@ -524,250 +501,77 @@ CREATE TABLE consent_audit_logs (
         const rect = c.getBoundingClientRect();
         const x = (e.clientX || e.touches[0].clientX) - rect.left;
         const y = (e.clientY || e.touches[0].clientY) - rect.top;
-
-        context.lineWidth = 2.5;
-        context.lineCap = 'round';
-        context.strokeStyle = '#0284c7';
-
-        context.lineTo(x, y);
-        context.stroke();
-        context.beginPath();
-        context.moveTo(x, y);
+        context.lineWidth = 2.5; context.lineCap = 'round'; context.strokeStyle = '#0284c7';
+        context.lineTo(x, y); context.stroke(); context.beginPath(); context.moveTo(x, y);
     }
 
-    function clearCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        isPatientSigned = false;
-        updateBindingToken();
-        checkFormCompletion();
-    }
-
-    function clearWitnessCanvas() {
-        wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
-    }
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); isPatientSigned = false; updateBindingToken(); checkFormCompletion(); }
+    function clearWitnessCanvas() { wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height); }
 
     async function sha256(str) {
         const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
         return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-/*
---------------------------------------------------------------------------------
-2. PSEUDO CODE STEP 1: DOCUMENT PAYLOAD HASHING (คำนวณข้อความเนื้อหาการแพทย์)
---------------------------------------------------------------------------------
-[Dev Back-End Logic]:
-เมื่อสร้าง หรือ ดึงเอกสารขึ้นมา ต้องนำข้อความเนื้อหาทั้งหมดมาทำ SHA-256 Hash
-เพื่อใช้เปรียบเทียบว่าเนื้อหาเดิมถูกแก้ไขย้อนหลังหรือไม่
-*/
     async function updateHash() {
         const payload = {
             docId: document.getElementById('docRefId').innerText,
             patientName: document.getElementById('patientName').value,
-            patientHN: document.getElementById('patientHN').value,
-            procedure: document.getElementById('procedureTitle').value,
-            marketingConsent: document.getElementById('consentMarketing').checked
+            phone: document.getElementById('patientPhone').value
         };
-        const rawString = JSON.stringify(payload);
-        const hash = await sha256(rawString);
-        document.getElementById('docHashDisplay').innerText = hash;
+        document.getElementById('docHashDisplay').innerText = await sha256(JSON.stringify(payload));
     }
 
-/*
---------------------------------------------------------------------------------
-3. PSEUDO CODE STEP 2: SIGNER CONTROL (ยืนยันตัวตน + บันทึก Ref ID & IP)
---------------------------------------------------------------------------------
-[Dev Back-End Logic]:
-- กรณี SMS OTP: ยิง API ไปยัง SMS Gateway นอก (e.g. ThaiBulkSMS) 
-  แล้วรับค่า gateway_transaction_id กลับมาบันทึกลง DB
-- กรณี QR Code: เมื่อมือถือคนไข้สแกน URL ให้ดึง IP Address และ User-Agent ของมือถือ
-  บันทึกลง DB คู่กับ session_id (UUIDv4)
-*/
-    function verifySignerIdentity(method) {
-        isSignerVerified = true;
-        stopListeningStatus();
-
-        // จำลอง Ref ID ที่ได้จาก Third-Party Gateway หรือ QR Session
-        currentAuthTransactionId = method === 'SMS_OTP' 
-            ? "SMS-GTW-20260723-88912" 
-            : "QR-SESS-550e8400-e29b-41d4";
-
-        document.getElementById('authStatusBadge').className = 'badge-verified';
-        const methodText = method === 'SMS_OTP' ? 'SMS OTP Verified' : 'Mobile QR Scan Approved';
-        document.getElementById('authStatusBadge').innerText = '✅ ยืนยันตัวตนสำเร็จ (' + methodText + ')';
-        document.getElementById('canvasDisabledOverlay').style.display = 'none';
-
-        addAuditLog('PATIENT', 'AUTH_VERIFIED', 'Verified via ' + method + ' [Ref: ' + currentAuthTransactionId + ']');
-        checkFormCompletion();
-    }
-
-/*
---------------------------------------------------------------------------------
-4. PSEUDO CODE STEP 3: DYNAMIC SIGNATURE BINDING (ผูกลายเซ็นเข้ากับเอกสาร)
---------------------------------------------------------------------------------
-[Dev Back-End Logic]:
-*** ห้ามเซฟภาพลายเซ็นแยกเป็นไฟล์รูปภาพเปล่าๆ เด็ดขาด ***
-สูตรคำนวณ Dynamic Signature Binding Token:
-Binding_String = SHA256(Doc_Payload_Hash + "_" + HN + "_" + Auth_Transaction_ID + "_" + Client_IP + "_" + Canvas_Base64_First100)
-Binding_Token  = "BIND-PATIENT-" + SHA256(Binding_String).substring(0, 12)
-
-[ความคุ้มครองทางกฎหมาย]:
-หาก รพ. แอบปั๊มลายเซ็นเองโดยไม่มี Auth_Transaction_ID จาก Gateway นอก หรือ IP ไม่ตรง
-ค่า Hash สลักย้อนหลังจะไม่ตรงกัน ทำให้ตรวจสอบพบการแอบอ้างทันที
-*/
     async function updateBindingToken() {
         const docHash = document.getElementById('docHashDisplay').innerText;
-        const canvasData = canvas.toDataURL();
-        const clientIpSimulated = "223.24.188.91"; // ในระบบจริง ดึงจาก req.headers['x-forwarded-for'] บนมือถือคนไข้
-        
-        // สูตรผูก Hash (Cryptographic Binding Formula)
-        const bindingRaw = docHash + "_" + document.getElementById('patientHN').value + "_" + currentAuthTransactionId + "_" + clientIpSimulated + "_" + canvasData.substring(0, 100);
-        const bindingHash = await sha256(bindingRaw);
-        
-        const tokenStr = "BIND-PATIENT-" + bindingHash.substring(0, 12).toUpperCase();
-        document.getElementById('bindingToken').innerText = tokenStr;
-        document.getElementById('bindingHashDisplay').innerText = bindingHash;
+        const raw = docHash + "_" + document.getElementById('patientPhone').value + "_" + currentAuthTransactionId + "_" + canvas.toDataURL().substring(0, 100);
+        const hash = await sha256(raw);
+        document.getElementById('bindingToken').innerText = "BIND-" + hash.substring(0, 12).toUpperCase();
+        document.getElementById('bindingHashDisplay').innerText = hash;
     }
 
-    function startListeningStatus() {
-        stopListeningStatus();
-        try {
-            eventSource = new EventSource(`https://ntfy.sh/${NTFY_TOPIC}/sse`);
-            eventSource.addEventListener('message', (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data && data.message && data.message.includes('APPROVED')) {
-                        verifySignerIdentity('MOBILE_QR_SCAN_REAL');
-                    }
-                } catch (err) { console.error("JSON parse error:", err); }
-            });
-            eventSource.onerror = (err) => { console.log("SSE Reconnecting...", err); };
-        } catch (e) { console.error("SSE Connection error:", e); }
-    }
-
-    function stopListeningStatus() {
-        if (eventSource) { eventSource.close(); eventSource = null; }
-    }
-
-/*
---------------------------------------------------------------------------------
-5. PSEUDO CODE STEP 4: DOCTOR PKI SEAL & CLOUD HSM INTEGRATION
---------------------------------------------------------------------------------
-[Dev Back-End Logic]:
-เมื่อคนไข้ลงนามเสร็จ และแพทย์ยืนยัน PIN:
-1. ส่ง PDF Draft + Doctor PIN ไปที่ API ของ Cloud HSM (INET / TDID / NT CA)
-2. Cloud HSM ทำการประทับตรา PAdES Digital Seal (X.509 Corporate Certificate ของ รพ.)
-3. คืนค่า Signed PDF + TSA Time-Stamp (RFC 3161) กลับมาบันทึกลง EMR
-*/
-    async function executeDoctorPKISign() {
-        if (!isPatientSigned) {
-            alert('⚠️ คนไข้ต้องลงนามในขั้นตอนที่ 3 ก่อน แพทย์จึงจะลงนามปิดท้ายได้');
-            return;
-        }
-        const pin = document.getElementById('doctorPin').value;
-        if (pin !== "123456") {
-            alert('❌ PIN รหัสผ่าน Private Key ไม่ถูกต้อง');
-            return;
-        }
-
+    function executeDoctorPKISign() {
+        if (!isPatientSigned) { alert('⚠️ คนไข้ต้องลงนามก่อน'); return; }
+        if (document.getElementById('doctorPin').value !== "123456") { alert('❌ PIN แพทย์ไม่ถูกต้อง'); return; }
         isDoctorSigned = true;
         document.getElementById('doctorSignStatus').className = 'badge-verified';
         document.getElementById('doctorSignStatus').innerText = '✅ PKI Signed';
-        
-        const doctorHash = await sha256("DOCTOR_PKI_SEAL_MKT_HOSPITAL_" + new Date().getTime());
-        document.getElementById('doctorPKIHashDisplay').innerText = doctorHash;
-
-        addAuditLog('DOCTOR', 'MASTER_IMAGE_APPLIED', 'Applied Layer 1 Master Signature Image');
-        addAuditLog('DOCTOR', 'PKI_SEALED', 'Applied Layer 2 X.509 Digital Seal via MKT Cloud HSM + TSA');
-
+        addAuditLog('DOCTOR', 'PKI_SEALED', 'Digital seal applied');
         checkFormCompletion();
-        alert('✅ แพทย์ลงนามประทับตราดิจิทัลเรียบร้อยแล้ว!');
+        alert('✅ แพทย์ลงนามประทับตราดิจิทัลเรียบร้อย!');
     }
 
     function checkFormCompletion() {
         const btnSave = document.getElementById('btnSaveComplete');
         const statusText = document.getElementById('stepCheckStatus');
-
         if (isSignerVerified && isPatientSigned && isDoctorSigned) {
             btnSave.disabled = false;
-            statusText.innerHTML = "✅ <strong style='color:#166534;'>กรอกข้อมูลและลงนามครบถ้วน พร้อมบันทึก</strong>";
+            statusText.innerHTML = "✅ <strong style='color:#166534;'>พร้อมบันทึกเอกสาร</strong>";
         } else {
             btnSave.disabled = true;
-            let missing = [];
-            if (!isSignerVerified) missing.push("ยืนยันตัวตนคนไข้");
-            if (!isPatientSigned) missing.push("ลายเซ็นคนไข้");
-            if (!isDoctorSigned) missing.push("ตราประทับแพทย์");
-            statusText.innerText = "📌 รอขั้นตอน: " + missing.join(", ");
         }
     }
 
     function executeSaveAndPreview() {
-        addAuditLog('SYSTEM', 'DOC_SAVED', 'Document saved and Cryptographic PDF generated');
-        openPdfPreview();
-    }
-
-    function openPdfPreview() {
         document.getElementById('pdfDocRef').innerText = document.getElementById('docRefId').innerText;
         document.getElementById('pdfPatientName').innerText = document.getElementById('patientName').value;
-        document.getElementById('pdfPatientHN').innerText = document.getElementById('patientHN').value;
+        document.getElementById('pdfPatientPhone').innerText = document.getElementById('patientPhone').value;
         document.getElementById('pdfProcedure').innerText = document.getElementById('procedureTitle').value;
-        
         document.getElementById('pdfPatientSigImg').src = canvas.toDataURL();
         document.getElementById('pdfPatientBindingText').innerText = document.getElementById('bindingToken').innerText;
-        document.getElementById('pdfAuthMethodText').innerText = 'ยืนยันตัวตนด้วย ' + (authMethodUsed === 'OTP' ? 'SMS OTP' : 'Mobile App QR Scan');
-
         document.getElementById('pdfPreviewModal').style.display = 'flex';
     }
 
-    function closePdfPreview() {
-        document.getElementById('pdfPreviewModal').style.display = 'none';
-    }
-
-    function downloadRealSignedPDF() {
-        const element = document.getElementById('pdfExportArea');
-        const docRef = document.getElementById('docRefId').innerText;
-
-        const opt = {
-            margin: 10,
-            filename: 'eConsent_' + docRef + '_Signed_PKI.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save().then(() => {
-            console.log("PDF Saved successfully");
-        }).catch(err => {
-            console.error("PDF Download error:", err);
-            alert("เกิดข้อผิดพลาดในการดาวน์โหลด PDF");
-        });
-    }
-
-/*
---------------------------------------------------------------------------------
-6. PSEUDO CODE STEP 5: TAMPER DETECTION & RE-VALIDATION ENGINE
---------------------------------------------------------------------------------
-[Dev Back-End Logic]:
-ฟังก์ชันสำหรับตรวจสอบเมื่อมีการเปิดดูย้อนหลัง หรือเมื่อประกันสงสัยว่าถูกแอบแก้ไข
-คำนวณ Payload Hash และ Binding Hash ใหม่ หากไม่ตรงกับ DB ให้ปรับ Status = 'TAMPERED'
-*/
-    function simulateTamper() {
-        document.getElementById('patientName').value += " (ถูกแก้ไขแอบอ้าง)";
-        updateHash();
-        document.getElementById('docHashDisplay').style.color = '#ef4444';
-        alert('⚠️ ค่า SHA-256 Hash เปลี่ยนแปลงทันที! ระบบแจ้งเตือนการดัดแปลงเอกสาร (Tamper Event Detected)');
+    function closePdfPreview() { document.getElementById('pdfPreviewModal').style.display = 'none'; }
+    function downloadPDF() {
+        html2pdf().from(document.getElementById('pdfExportArea')).save('eConsent_Signed.pdf');
     }
 
     function addAuditLog(actor, action, details) {
         const tbody = document.getElementById('auditLogBody');
         const now = new Date().toTimeString().split(' ')[0];
-        const row = `<tr>
-            <td>${now}</td>
-            <td><strong>${actor}</strong></td>
-            <td><code>${action}</code></td>
-        </tr>`;
-        tbody.innerHTML = row + tbody.innerHTML;
+        tbody.innerHTML = `<tr><td>${now}</td><td><strong>${actor}</strong></td><td><code>${action}</code></td></tr>` + tbody.innerHTML;
     }
 </script>
-
 </body>
 </html>

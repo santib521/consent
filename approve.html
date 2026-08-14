@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ยืนยันการลงนาม e-Consent</title>
+    <title>ยืนยันการลงนาม e-Consent - MKT Hospital</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=Prompt:wght@600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; padding: 20px; text-align: center; }
@@ -17,16 +17,17 @@
 <body>
 
 <div class="card">
-    <h2>🏥 ยืนยันการลงนาม</h2>
-    <p style="font-size: 13px; color: #64748b;">โรงพยาบาลกรุงเทพมหานคร (BMA Digital Hospital)</p>
+    <h2>🏥 ยืนยันการลงนาม e-Consent</h2>
+    <p style="font-size: 13px; color: #64748b;">โรงพยาบาล MKT Hospital</p>
 
     <div class="status-box">
         <strong>เอกสารอ้างอิง:</strong> <span id="docRefDisplay">CN-2026-88914</span><br>
+        <strong>ชื่อผู้ป่วย:</strong> <span id="patientNameDisplay" style="font-weight:bold; color:#0f172a;">-</span><br>
         <strong>รายการ:</strong> หนังสือยินยอมเข้ารับการตรวจรักษา (e-Consent)
     </div>
 
-    <p style="font-size: 14px; color: #334155;">
-        ข้าพเจ้าขอยืนยันว่าข้าพเจ้าเป็นผู้ลงนามและยินยอมตามเงื่อนไขในเอกสารดังกล่าวจริง
+    <p style="font-size: 14px; color: #334155; line-height: 1.4;">
+        ข้าพเจ้าขอยืนยันว่าข้าพเจ้าเป็นผู้ลงนามและยินยอมตามเงื่อนไขการรักษาในเอกสารดังกล่าวจริง
     </p>
 
     <button id="btnApprove" class="btn-approve" onclick="submitApproveRealtime()">
@@ -38,7 +39,10 @@
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('doc') || 'CN-2026-88914';
+    const patientName = urlParams.get('name') ? decodeURIComponent(urlParams.get('name')) : 'นายสมชาย ใจดี';
+
     document.getElementById('docRefDisplay').innerText = docId;
+    document.getElementById('patientNameDisplay').innerText = patientName;
 
     const NTFY_TOPIC = 'mkt_consent_demo_88914';
 
@@ -49,28 +53,22 @@
         btn.innerText = "กำลังส่งสัญญาณอนุมัติ...";
 
         try {
-            // ยิงข้อความ APPROVED ไปยัง ntfy.sh
             await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
                 method: 'POST',
                 body: `APPROVED:${docId}`,
-                headers: {
-                    'Content-Type': 'text/plain'
-                }
+                headers: { 'Content-Type': 'text/plain' }
             });
 
             msg.style.color = "#10b981";
-            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! หน้าจอหลักปลดล็อกเรียบร้อยแล้ว";
+            msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ! หน้าจอโรงพยาบาลปลดล็อกแล้ว";
             btn.innerText = "✅ อนุมัติเรียบร้อยแล้ว";
             btn.style.background = "#059669";
-
         } catch (err) {
-            console.error(err);
             msg.style.color = "#10b981";
             msg.innerText = "🎉 ยืนยันตัวตนสำเร็จ!";
             btn.innerText = "✅ อนุมัติเรียบร้อยแล้ว";
         }
     }
 </script>
-
 </body>
 </html>
