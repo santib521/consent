@@ -34,8 +34,8 @@ app.post('/api/send-sms', async (req, res) => {
         params.append('To', formattedPhone);
         params.append('From', TWILIO_CONFIG.twiliophoneNumber);
         
-        // บังคับใช้เทมเพลตมาตรฐานที่ Twilio Trial รองรับ (เช่น แจ้งเตือนนัดหมาย)
-        params.append('Body', 'Your appointment reminder: MKT Hospital e-Consent verification code is ready.');
+        // บังคับใช้ Template มาตรฐานที่ Twilio Trial อนุญาต
+        params.append('Body', 'sms_appointment_reminders');
 
         const credentials = Buffer.from(`${TWILIO_CONFIG.apiKey}:${TWILIO_CONFIG.apiSecret}`).toString('base64');
 
