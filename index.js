@@ -30,11 +30,12 @@ app.post('/api/send-sms', async (req, res) => {
 
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_CONFIG.accountSid}/Messages.json`;
 
-        // ใช้ข้อความมาตรฐานที่บัญชี Trial อนุญาตให้ส่งผ่าน API โดยตรง
         const params = new URLSearchParams();
         params.append('To', formattedPhone);
         params.append('From', TWILIO_CONFIG.twiliophoneNumber);
-        params.append('Body', 'Your Twilio trial verification code is: 123456');
+        
+        // บังคับใช้เทมเพลตมาตรฐานที่ Twilio Trial รองรับ (เช่น แจ้งเตือนนัดหมาย)
+        params.append('Body', 'Your appointment reminder: MKT Hospital e-Consent verification code is ready.');
 
         const credentials = Buffer.from(`${TWILIO_CONFIG.apiKey}:${TWILIO_CONFIG.apiSecret}`).toString('base64');
 
