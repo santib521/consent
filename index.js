@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// --- ตั้งค่าข้อมูล Twilio ของคุณ ---
 const TWILIO_CONFIG = {
     accountSid: "AC5bdf4ab6e4c0b1f8a8c35cd4468e42df",
     apiKey: "SKaca5862f00ae751f9a3cb816cbd20981",
@@ -31,12 +30,14 @@ app.post('/api/send-sms', async (req, res) => {
 
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_CONFIG.accountSid}/Messages.json`;
 
+        // ปรับแต่งข้อความให้ขึ้นต้นด้วยรูปแบบที่ Twilio Trial อนุญาตให้ส่งผ่าน API ได้
+        const trialFriendlyMessage = `Sent from Twilio Trial - ${message}`;
+
         const params = new URLSearchParams();
         params.append('To', formattedPhone);
         params.append('From', TWILIO_CONFIG.twiliophoneNumber);
-        params.append('Body', message);
+        params.append('Body', trialFriendlyMessage);
 
-        // เข้ารหัส Basic Auth ให้ถูกต้องตามมาตรฐาน Twilio API
         const credentials = Buffer.from(`${TWILIO_CONFIG.apiKey}:${TWILIO_CONFIG.apiSecret}`).toString('base64');
 
         const response = await axios.post(twilioUrl, params, {
@@ -46,12 +47,11 @@ app.post('/api/send-sms', async (req, res) => {
             }
         });
 
-        console.log(`SMS Sent via Twilio to ${formattedPhone}, SID: ${response.data.sid}`);
+        console.log(`SMS Sent via Twilio Trial to ${formattedPhone}, SID: ${response.data.sid}`);
         return res.json({ success: true, sid: response.data.sid });
 
     } catch (error) {
-        // พิมพ์ Error ออกมาดูแบบละเอียดใน Log ของ Render
-        console.error('Twilio Error Detail:', error.response?.data || error.message);
+        console.error('Twilio Trial Error Detail:', error.response?.data || error.message);
         return res.status(500).json({ 
             success: false, 
             error: error.response?.data || error.message 
