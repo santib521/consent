@@ -5,17 +5,17 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// เปิดใช้งาน CORS ให้หน้าเว็บเรียกใช้งานได้
 app.use(cors());
 app.use(express.json());
 
-// ตั้งค่าข้อมูล SMS-KUB API ของคุณ
-const SMSKUB_CONFIG = {
-    endpoint: "https://console.sms-kub.com/api/send",
-    apiKey: "gK6sDWwzsMWe7w9tpVirKIrNfqj5j9jH"
+// --- ตั้งค่าข้อมูล Twilio ของคุณ ---
+const TWILIO_CONFIG = {
+    accountSid: "AC5bdf4ab6e4c0b1f8a8c35cd4468e42df",
+    apiKey: "SKaca5862f00ae751f9a3cb816cbd20981",
+    apiSecret: "f1fOKFEPam26odQV24LIVDgS180SxWWA",
+    twiliophoneNumber: "+17372508034"
 };
 
-// API Endpoint สำหรับรับคำสั่งส่ง SMS จากหน้าเว็บ e-Consent
 app.post('/api/send-sms', async (req, res) => {
     const { phone, message } = req.body;
 
@@ -23,21 +23,37 @@ app.post('/api/send-sms', async (req, res) => {
         return res.status(400).json({ success: false, message: 'Missing phone or message' });
     }
 
+    // แปลงเบอร์โทรไทย (เช่น 0813338900) ให้เป็นรูปแบบสากล (+66813338900)
+    let formattedPhone = phone.trim();
+    if (formattedPhone.startsWith('0')) {
+        formattedPhone = '+66' + formattedPhone.substring(1);
+    }
+
+    // Twilio REST API Endpoint
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_CONFIG.accountSid}/Messages.json`;
+
+    // เตรียม Form Data สำหรับส่งไปยัง Twilio
+    const params = new URLSearchParams();
+    params.append('To', formattedPhone);
+    params.append('From', TWILIO_CONFIG.twiliophoneNumber);
+    params.append('Body', message);
+
     try {
-        // ยิงคำขอไปยัง SMS-KUB API จริงฝั่ง Server-to-Server (ไม่ติด CORS)
-        const response = await axios.post(SMSKUB_CONFIG.endpoint, {
-            apiKey: SMSKUB_CONFIG.apiKey,
-            to: phone,
-            message: message
-        }, {
-            headers: { 'Content-Type': 'application/json' }
+        // ทำการ Basic Auth ด้วย API Key และ Secret
+        const authHeader = 'Basic ' + Buffer.from(`${TWILIO_CONFIG.apiKey}:${TWILIO_CONFIG.apiSecret}`).toString('base64');
+
+        const response = await axios.post(twilioUrl, params, {
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
         });
 
-        console.log(`SMS Sent Successfully to ${phone}`);
-        res.json({ success: true, data: response.data });
+        console.log(`SMS Sent via Twilio to ${formattedPhone}`);
+        res.json({ success: true, sid: response.data.sid });
 
     } catch (error) {
-        console.error('SMS Gateway Error:', error.response?.data || error.message);
+        console.error('Twilio Error:', error.response?.data || error.message);
         res.status(500).json({ 
             success: false, 
             error: error.response?.data || error.message 
@@ -45,9 +61,8 @@ app.post('/api/send-sms', async (req, res) => {
     }
 });
 
-// ตรวจสอบสถานะการทำงานของ Server
 app.get('/', (req, res) => {
-    res.send('MKT Hospital SMS Proxy Server is running.');
+    res.send('MKT Hospital Twilio SMS Proxy Server is running.');
 });
 
 app.listen(PORT, () => {
