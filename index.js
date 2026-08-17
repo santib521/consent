@@ -25,9 +25,9 @@ app.post('/api/send-sms', async (req, res) => {
             formattedPhone = '0' + formattedPhone.substring(3);
         }
 
-        const thsmsUrl = 'https://thsms.com/api/send-sms';
+        // ใช้ Endpoint ที่ถูกต้องตามระบบ THSMS จริง
+        const thsmsUrl = 'https://thsms.com/sms-api';
 
-        // โครงสร้างเดียวกับที่เทสผ่าน Postman สำเร็จ 100%
         const payload = {
             sender: "SMSOTP",
             msisdn: [formattedPhone],
