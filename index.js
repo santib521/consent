@@ -8,67 +8,84 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const THSMS_API_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC90aHNtcy5jb21cL21hbmFnZVcvYXBpLWtleSIsImlhdCI6MTc4Njg0Mjg2MywibmJmIjoxNzg2ODQyODYzLCJqdGkiOiJzVWp2WkRlMUV0Rmg4OUVqIiwic3ViIjoxMTI1MDIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ._iPHlM6Xsj983H8J0JHr8rZ4DFZWBQJ-zYIlMYY2J9I";
+const THSMS_CONFIG = {
+    apiKey: process.env.THSMS_API_KEY || "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC90aHNtcy5jb21cL21hbmFnZVcvYXBpLWtleSIsImlhdCI6MTc4Njg0Mjg2MywibmJmIjoxNzg2ODQyODYzLCJqdGkiOiJzVWp2WkRlMUV0Rmg4OUVqIiwic3ViIjoxMTI1MDIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ._iPHlM6Xsj983H8J0JHr8rZ4DFZWBQJ-zYIlMYY2J9I"
+};
 
-// ป้ายกำกับพิสูจน์เวอร์ชันโค้ด
-const PROOF_VERSION_TAG = "PROVE_THSMS_V2_SUCCESS_2026";
+// แปลงเบอร์โทรให้เป็นรูปแบบ 0XXXXXXXXX ที่ THSMS ต้องการ
+// รองรับ "0874999456", "+66874999456", "66874999456", "0066874999456"
+// และเบอร์ที่มีขีด/วงเล็บ/เว้นวรรคปน เช่น "087-499-9456"
+function normalizePhone(raw) {
+    if (raw === undefined || raw === null) return null;
+
+    let phone = String(raw).trim().replace(/[\s\-()]/g, '');
+
+    if (phone.startsWith('+66')) {
+        phone = '0' + phone.slice(3);
+    } else if (phone.startsWith('0066')) {
+        phone = '0' + phone.slice(4);
+    } else if (phone.startsWith('66') && phone.length === 11) {
+        phone = '0' + phone.slice(2);
+    }
+
+    if (!/^0\d{9}$/.test(phone)) {
+        return null; // ไม่ใช่รูปแบบเบอร์มือถือไทยที่ถูกต้อง
+    }
+
+    return phone;
+}
 
 app.post('/api/send-sms', async (req, res) => {
-    const targetUrl = 'https://thsms.com/api/send-sms';
-    
     try {
-        const { phone, message } = req.body;
+        const { message } = req.body;
+        // รับได้ทั้ง phone (เดี่ยว) และ msisdn (array แบบเดียวกับที่ยิงตรงผ่าน Postman)
+        const rawPhones = req.body.msisdn ?? req.body.phone;
 
-        if (!phone || !message) {
-            return res.status(400).json({ 
-                success: false, 
-                proofTag: PROOF_VERSION_TAG,
-                message: 'Missing phone or message' 
-            });
+        if (!rawPhones || !message) {
+            return res.status(400).json({ success: false, message: 'Missing phone or message' });
         }
 
-        let formattedPhone = phone.trim();
-        if (formattedPhone.startsWith('+66')) {
-            formattedPhone = '0' + formattedPhone.substring(3);
+        const phoneList = Array.isArray(rawPhones) ? rawPhones : [rawPhones];
+        const msisdn = phoneList.map(normalizePhone);
+
+        if (msisdn.includes(null)) {
+            return res.status(400).json({ success: false, message: 'Invalid phone number format', invalid: phoneList.filter((_, i) => msisdn[i] === null) });
         }
+
+        const thsmsUrl = 'https://thsms.com/api/send-sms';
 
         const payload = {
             sender: "SMSOTP",
-            msisdn: [formattedPhone],
+            msisdn,
             message: message
         };
 
-        // ส่ง Request ไปยัง THSMS พร้อมบันทึกหลักฐาน
-        const response = await axios.post(targetUrl, payload, {
+        const response = await axios.post(thsmsUrl, payload, {
             headers: {
-                'Authorization': `Bearer ${THSMS_API_KEY}`,
+                'Authorization': `Bearer ${THSMS_CONFIG.apiKey}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            timeout: 10000
         });
 
-        // ส่ง Response กลับพร้อมหลักฐานพิสูจน์ว่าโค้ดนี้ทำงานจริง
-        return res.json({ 
-            success: true, 
-            proofTag: PROOF_VERSION_TAG,
-            targetUrlUsed: targetUrl,
-            thsmsResponse: response.data 
-        });
+        console.log(`SMS Sent successfully via THSMS to ${msisdn.join(', ')}`, response.data);
+        return res.json({ success: true, data: response.data });
 
     } catch (error) {
-        // หากเกิด Error จะส่งข้อมูลดิบกลับมาให้เห็นใน Network Tab ทันที
-        return res.status(500).json({ 
-            success: false, 
-            proofTag: PROOF_VERSION_TAG,
-            targetUrlUsed: targetUrl,
-            errorDetail: error.response?.data || error.message 
+        const errorDetail = error.response?.data || error.message;
+        console.error('THSMS Error Detail:', errorDetail);
+
+        return res.status(error.response?.status || 500).json({
+            success: false,
+            error: errorDetail
         });
     }
 });
 
 app.get('/', (req, res) => {
-    res.send(`Proxy is running. Proof Version: ${PROOF_VERSION_TAG}`);
+    res.send('MKT Hospital THSMS Proxy Server is running.');
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT} [Tag: ${PROOF_VERSION_TAG}]`);
+    console.log(`Server is running on port ${PORT}`);
 });
